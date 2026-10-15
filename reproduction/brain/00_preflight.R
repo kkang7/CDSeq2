@@ -1,0 +1,11 @@
+script <- sub("^--file=", "", grep("^--file=",commandArgs(),value=TRUE)[1])
+source(file.path(dirname(normalizePath(script)),"bootstrap.R"))
+required <- c("CDSeq2","mgcv","Matrix","SingleCellExperiment","SummarizedExperiment")
+missing <- required[!vapply(required,requireNamespace,logical(1),quietly=TRUE)]
+if(length(missing)) stop("Install required packages: ",paste(missing,collapse=", "))
+paths <- path.expand(c(training_file,reference_file,file.path(transfer_dir,"inputs/new_donor_scaffold.rds"),file.path(transfer_dir,"FRESH_REQUEST/request.rds")))
+expected <- c("1bb46db5e1b8f69088dd273deb9c3ead","2831486744ba826a824145398c9a6991","9c341b5907dd16338365665ef3414a27","6057b67c1ccdead0306fe14c20fb36e0")
+stopifnot(all(file.exists(paths)),identical(unname(tools::md5sum(paths)),expected))
+print(data.frame(package=required,version=vapply(required,function(x)as.character(packageVersion(x)),character(1))))
+cat("Study inputs and bundled engines verified. BayesPrism available:",requireNamespace("BayesPrism",quietly=TRUE),"\n")
+cat("Preflight does not test inference or worker socket availability.\n")

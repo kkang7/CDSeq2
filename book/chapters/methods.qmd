@@ -1,0 +1,34 @@
+# Model and interpretation
+
+## Bulk mixtures do not uniquely identify every component
+
+For gene $g$ in donor $i$, a simple normalized mixture model is
+
+$$b_{gi}\approx\sum_{k=1}^{K}\rho_{ki}\,\theta_{gki},$$
+
+where $\rho_{ki}$ is a type's RNA fraction and $\theta_{gki}$ is its donor-specific expression. CDSeq2 uses reference information and a probabilistic read-allocation model to estimate these quantities.
+
+Even if all fractions were known, one bulk observation does not uniquely determine all $K$ donor-specific component values. For two nonzero fractions, a small change
+
+$$\theta'_{g1i}=\theta_{g1i}+\delta,\qquad
+\theta'_{g2i}=\theta_{g2i}-\frac{\rho_{1i}}{\rho_{2i}}\delta$$
+
+preserves the bulk sum whenever the altered values remain admissible. Normalization and priors add constraints, but do not guarantee unique recovery of every gene–type profile. Similar cell-type references, low RNA abundance, low counts and donor heterogeneity can all limit information.
+
+Reference priors make inference possible by favoring plausible solutions. They do not replace the need to evaluate individual-level variation against known components. The software's added prioritization component addresses this uneven recoverability by making profile-level support accessible to the user.
+
+## Prioritization model
+
+For each cell type $k$, the response is the across-donor normalized Pearson recovery $r_{gk}$. The six-feature additive model has the form
+
+$$\operatorname{atanh}(r_{gk})=\beta_{0k}+\sum_{j=1}^{6}f_{jk}(x_{gjk})+\varepsilon_{gk}.$$
+
+Training clips correlations away from the boundaries before transformation. The observable features summarize contribution, read support, specificity, variability, donor concentration and expression–fraction correlation. Predicted Fisher values are transformed back to the correlation scale to form the ranking score.
+
+The model predicts profile recovery in its training context. It neither supplies a confidence interval for an individual transcript estimate nor assigns an association FDR. The [training chapter](training.qmd) explains donor separation and independent validation.
+
+## What the paper supports
+
+The evaluated brain benchmarks show similar overall individual-expression recovery for CDSeq2 and BayesPrism in excitatory neurons, with CDSeq2's extra prioritization functionality enriching more accurately recovered profiles. Common-panel comparisons report coverage explicitly. The independent-cohort eQTL experiment tests the frozen selection rule under new synthetic individuals, local LD and stress settings.
+
+The strongest association evidence is context dependent. Reference mismatch, low-abundance types, weak signals and indirect associations introduced by compositional normalization remain shared challenges for deconvolution-based analysis. Full outputs, selection diagnostics and sensitivity analyses support transparent interpretation and future work on better references, uncertainty propagation and more robust association models.

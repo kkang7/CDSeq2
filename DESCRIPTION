@@ -1,0 +1,35 @@
+Package: CDSeq2
+Title: Individual-Level Deconvolution and Cell Type-Specific Differential Expression Analysis
+Version: 0.0.0.9000
+Authors@R: 
+     c(person(given="Kai",
+     family="Kang",
+     email = "kangkai0714@gmail.com",
+     role = c("aut", "cre"),
+     comment = c( ORCID = "0000-0002-4348-3941")),
+     person(given="He",
+     family="Liang",
+     role="aut"))
+Description: Deconvolve bulk RNAseq on individual level and infer cell type-specific differential expression.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+LinkingTo: 
+    Rcpp,
+    RcppArmadillo
+Imports: 
+    Rcpp,
+    foreach,
+    doParallel,
+    Matrix,
+    limma,
+    methods,
+    stats,
+    utils,
+    mgcv
+Depends: 
+    R (>= 4.1.0)
+LazyData: true
+Config/roxygen2/version: 8.1.0
+URL: https://github.com/kkang7/CDSeq2
+BugReports: https://github.com/kkang7/CDSeq2/issues

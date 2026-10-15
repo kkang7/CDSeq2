@@ -1,0 +1,39 @@
+# Function reference
+
+The installed R help pages are the authoritative detailed argument reference. This index covers the individual-expression and variation-prioritization workflow used in this book.
+
+| Function | Use |
+|---|---|
+| `cdseq2()` | Infer RNA fractions and expression for individual bulk samples |
+| `prepare_variation_features()` | Construct observable gene–type features from bulk, reference mean and RNA fractions |
+| `score_variation()` | Predict recovery with an explicit trained scorer |
+| `select_variation_profiles()` | Keep a specified fraction within each type |
+| `prepare_variation_benchmark()` | Combine features and known-component recovery targets |
+| `simulate_variation_mixtures()` | Sample mixtures from donor-resolved components |
+| `train_variation_scorer()` | Train cell-type GAMs with grouped development folds |
+| `train_variation_scorer_from_features()` | Advanced training from an explicitly prepared feature/response table |
+| `validate_variation_scorer()` | Evaluate on target donors absent from training and reference |
+| `check_variation_scorer()` | Verify model structure and replay sentinel |
+| `save_variation_scorer()` | Save a trained scorer without overwriting an existing file |
+| `load_variation_scorer()` | Load and verify a saved scorer |
+| `import_variation_scorer()` | Import a supported historical model with provenance and replay checks |
+
+```r
+help("prepare_variation_features", package = "CDSeq2")
+help("train_variation_scorer", package = "CDSeq2")
+help("validate_variation_scorer", package = "CDSeq2")
+```
+
+## Common problems
+
+**The scorer rejects my panel or labels.** Check exact gene IDs, gene order, type names and the training panel. Reference-panel changes can alter support features. Do not silently reinterpret a model for new types.
+
+**Many scores are outside the training range.** Inspect the flagged features, library depth, reference match and RNA-fraction distributions. Range flags describe extrapolation; they are not calibrated correctness probabilities.
+
+**A profile has an undefined recovery correlation.** Constant profiles, absent components or zero libraries cannot provide the same across-donor target. Report unavailable counts rather than dropping individual donors to obtain a correlation.
+
+**Selection reduces my number of significant results.** This is expected when a fixed subset is applied after testing. Examine precision, full-target recall and retained counts together. The scorer does not create additional observations or association power.
+
+**My numeric results differ slightly.** Check the estimator, normalization, seed, chain settings, R and dependency versions. Use the frozen source archive for paper replay. Different native libraries or platforms can affect floating-point and Monte Carlo results.
+
+**A cache or lock fails a check.** Read the reported mismatch. Use a new output directory for changed designs. Do not bypass identity checks or reuse incomplete data as a completed run.

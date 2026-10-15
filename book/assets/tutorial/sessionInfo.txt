@@ -1,0 +1,23 @@
+R version 4.6.1 (2026-06-24)
+Platform: aarch64-apple-darwin23
+Running under: macOS Tahoe 26.7.1
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRblas.0.dylib 
+LAPACK: /Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1
+
+locale:
+[1] C.UTF-8/C.UTF-8/C.UTF-8/C/C.UTF-8/C.UTF-8
+
+time zone: America/New_York
+tzcode source: internal
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+loaded via a namespace (and not attached):
+ [1] compiler_4.6.1    Matrix_1.7-6      limma_3.68.5      parallel_4.6.1   
+ [5] tools_4.6.1       mgcv_1.9-4        Rcpp_1.1.2        CDSeq2_0.0.0.9000
+ [9] splines_4.6.1     codetools_0.2-20  nlme_3.1-170      doParallel_1.0.17
+[13] grid_4.6.1        iterators_1.0.14  foreach_1.5.2     statmod_1.5.2    
+[17] lattice_0.23-1   

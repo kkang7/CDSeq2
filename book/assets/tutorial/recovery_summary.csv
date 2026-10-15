@@ -1,0 +1,4 @@
+"cell_type","eligible","retained","fraction","median_all","median_selected"
+"Excitatory neurons",240,48,0.2,0.431837680981054,0.972646347305739
+"Inhibitory neurons",240,48,0.2,0.353873044699073,0.952169251542458
+"Astrocytes",240,48,0.2,0.461439744204637,0.962046350023162

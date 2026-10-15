@@ -1,0 +1,51 @@
+# Install CDSeq2
+
+## Install from this repository
+
+Use R 4.1 or newer, a C++ toolchain suitable for R packages, and an internet connection for dependencies. The bundled tutorial was tested with R 4.6.1 and CDSeq2 0.0.0.9000. The [paper benchmark](independent-eqtl.qmd) records a stricter environment for numerical replay.
+
+From the repository root in a terminal:
+
+```bash
+Rscript tools/install_dependencies.R
+R CMD INSTALL .
+```
+
+The helper installs missing CRAN dependencies and `limma` through Bioconductor without updating already installed packages. It does not install the CDSeq2 package until you run the second command.
+
+After the repository is public, installation from R is also possible:
+
+```r
+install.packages("remotes")
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+BiocManager::install("limma", ask = FALSE, update = FALSE)
+remotes::install_github("{{< var github_owner >}}/{{< var repository >}}")
+```
+
+Replace `YOUR_GITHUB_USERNAME` if the repository owner has not yet been configured. No public CDSeq2 repository address is assumed in this draft.
+
+## Check the installation
+
+```r
+library(CDSeq2)
+packageVersion("CDSeq2")
+stopifnot(all(c("cdseq2", "prepare_variation_features", "score_variation",
+               "train_variation_scorer", "select_variation_profiles") %in%
+              getNamespaceExports("CDSeq2")))
+help("cdseq2", package = "CDSeq2")
+```
+
+## Optional dependencies
+
+| Task | Additional software |
+|---|---|
+| Run the synthetic tutorial | No packages beyond CDSeq2's dependencies |
+| Render or preview this book | Quarto 1.7.32, the version used here |
+| Rebuild statistical figures | R; no CDSeq2 inference is run |
+| Rebuild the Figure 1 schematic | Python 3.9+, `reportlab`, `pypdfium2` |
+| Run the independent eQTL benchmark | BayesPrism and recorded CRAN/Bioconductor dependencies |
+
+Install the benchmark dependencies with `Rscript tools/install_dependencies.R benchmark`. It pins the BayesPrism source commit used in the paper, but does not force all installed dependencies to the recorded versions. Review the benchmark environment table before attempting exact replay.
+
+For source compilation setup, follow the [official R installation manual](https://cran.r-project.org/doc/manuals/r-release/R-admin.html). Quarto installation is described in the [official Quarto documentation](https://quarto.org/docs/get-started/).

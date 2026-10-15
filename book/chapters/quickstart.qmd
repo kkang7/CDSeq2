@@ -1,0 +1,60 @@
+# A complete synthetic tutorial
+
+Run inference, prioritization and association analysis in one small example. All counts and identifiers are simulated. No study data, genotype files or pretrained brain model are needed.
+
+## Run it
+
+From the repository root, after [installing CDSeq2](install.qmd):
+
+```bash
+Rscript --vanilla examples/run_tutorial.R
+```
+
+The run creates `examples/output/`. To run again, choose a new output directory:
+
+```bash
+Rscript --vanilla examples/run_tutorial.R work/tutorial-second-run
+```
+
+The checked run took about six seconds on the development computer; runtime varies by machine. The short chains make this a software demonstration, not a convergence study or a biological performance benchmark.
+
+## Follow the four parts
+
+| Script | What it does |
+|---|---|
+| `01_simulate.R` | Generates 240 genes, three cell types, 36 reference cells and separate 20-donor training and validation cohorts |
+| `02_deconvolve.R` | Runs CDSeq2 and extracts allocated counts and RNA fractions |
+| `03_prioritize.R` | Trains GAM6, checks validation donor separation, scores profiles and retains the top 20% within each type |
+| `04_associations.R` | Tests a continuous phenotype and a simulated genotype; adjusts all 720 gene–cell-type tests before applying the selection mask |
+
+The cell types are excitatory neurons, inhibitory neurons and astrocytes. Eight excitatory-neuron genes receive a phenotype effect and a different eight receive a genotype effect. These effects demonstrate the data flow, without pretending to model realistic genome-wide LD or clinical covariates.
+
+## Inspect the results
+
+```r
+z <- readRDS("examples/output/tutorial_objects.rds")
+dim(z$validation$counts)     # genes x cell types x donors: 240 x 3 x 20
+dim(z$validation$fractions)  # donors x cell types: 20 x 3
+table(z$priority$selected$cell_type,
+      z$priority$selected$retained)
+
+scores <- read.csv("examples/output/profile_scores.csv")
+phenotype <- read.csv("examples/output/phenotype_associations.csv")
+subset(phenotype, called_with_prioritization)
+```
+
+The executed example retained **48 of 240 profiles per cell type**. Its median across-donor correlations were:
+
+| Cell type | All profiles | Selected profiles | Retained |
+|---|---:|---:|---:|
+| Excitatory neurons | 0.432 | 0.973 | 48 / 240 |
+| Inhibitory neurons | 0.354 | 0.952 | 48 / 240 |
+| Astrocytes | 0.461 | 0.962 | 48 / 240 |
+
+These values come from the [executed synthetic tutorial](../assets/tutorial/recovery_summary.csv), with [session information](../assets/tutorial/sessionInfo.txt). They illustrate the API and should not be used as evidence for performance on human cohorts. Monte Carlo output may differ across software versions and platforms.
+
+## Files you can reuse
+
+`toy_scorer.rds` can be loaded with `load_variation_scorer()`. It is trained only for this synthetic setting. `profile_scores.csv` includes the selected flag and training-range diagnostics. The two association tables preserve every test, its effect, raw p value, full-family q value and the calls before and after prioritization. `donor_separation.csv` records the independent-cohort checks.
+
+For real data, continue with [input preparation](inputs.qmd), then use a scorer trained and validated for the relevant context. Do not apply the toy model to biological samples.

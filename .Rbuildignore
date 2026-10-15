@@ -1,0 +1,14 @@
+^book$
+^examples$
+^reproduction$
+^tools$
+^docs$
+^work$
+^\.github$
+^README\.md$
+^START_HERE\.txt$
+^RELEASE_NOTES\.md$
+^VALIDATION\.txt$
+^FILE_MANIFEST\.csv$
+^LICENSE\.md$
+^\.gitignore$

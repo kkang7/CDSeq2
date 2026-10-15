@@ -1,0 +1,58 @@
+# Reproduce the paper
+
+Start with the level of reproduction you need. Rendering this website does not run inference; lengthy experiments are explicit commands outside the book build.
+
+| Level | Included inputs | What is repeated |
+|---|---|---|
+| **Saved-data figures** | All 35 supplementary CSV tables; all independent-benchmark results | Figure construction, selected-profile summaries and accuracy checks |
+| **Independent eQTL benchmark** | Frozen aggregate parameters, reference, scorer and public haplotypes | Generation of new synthetic cohorts, native inference and all downstream tests |
+| **Original brain benchmarks** | Analysis scripts and exact input requirements | Direct aggregation, scorer development, continuous phenotypes and nominated-variant eQTLs; requires prepared study objects |
+
+## Part 1: inspect the underlying data
+
+```bash
+python3 reproduction/reproduce.py tables
+```
+
+This extracts the tables to `work/paper/supplementary_tables/` and checks every file against its SHA-256 fingerprint. Tables and the [figure-to-table map](../downloads/figure_data_map.csv) refer to manuscript revision 14. The expression violin comparison previously called S6 is **Figure S4** in this numbering.
+
+## Part 2: regenerate all 21 figures
+
+Install Python's `reportlab` and `pypdfium2` for the workflow schematic:
+
+```bash
+python3 -m venv work/figure-env
+work/figure-env/bin/python -m pip install reportlab pypdfium2
+python3 reproduction/reproduce.py figures --out work/figure-rebuild \
+  --python work/figure-env/bin/python
+```
+
+On Windows, use the virtual environment's `Scripts/python.exe`. Rscript must be available on your PATH. The driver reconstructs the six main figures and fifteen supplementary figures in PNG and PDF, recomputes the precision–recall/F1 summaries and selected-expression summaries, and runs independent CSV checks. Output is under `work/figure-rebuild/paper/figures/`.
+
+No MCMC inference is run in this part. Recreating a figure from saved data verifies its numerical presentation; it is a different check from rerunning the experiment that generated the data. Choose a new `--out` directory if an existing table has been edited: the driver refuses to replace changed input tables.
+
+## Part 3: rerun the independent benchmark
+
+```bash
+python3 reproduction/reproduce.py independent-prepare
+Rscript tools/install_dependencies.R benchmark
+python3 reproduction/reproduce.py independent-run --workers 4
+```
+
+Read the [independent benchmark chapter](independent-eqtl.qmd) before the final command. It is a substantial native-inference run, not a quick example. It uses the frozen design, verifies inputs, reuses valid caches, and fails rather than mixing changed settings with old results. The benchmark archive includes the exact CDSeq2 source snapshot and recorded environment.
+
+For figures from the already computed independent-benchmark results only:
+
+```bash
+python3 reproduction/reproduce.py independent-figures
+```
+
+## Part 4: original brain-data experiments
+
+The [brain benchmark chapter](brain-benchmarks.qmd) gives the ordered scripts, inputs, seeds and current BayesPrism preprocessing. The scripts are included, but the prepared donor-resolved study objects are not. Their upstream public-access/preprocessing release remains an author action. Use the fully synthetic tutorial and the compact independent benchmark while those inputs are unavailable.
+
+## Reproduction records
+
+The repository contains the original paper plotting code, unchanged statistical tables, source manifests, and the independent benchmark's verification records. The new book's [validation record](../downloads/book_validation.txt) distinguishes checks executed for this release from earlier complete experiment runs. No new 40-cohort full inference run is implied by a successful website build.
+
+The book, package and experiment assets share a repository but remain separate directories. R package installation excludes book assets, archives, caches and reproduction scripts. Generated native fit caches belong in `work/` and are excluded from Git.

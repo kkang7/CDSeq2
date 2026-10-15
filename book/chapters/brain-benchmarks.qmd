@@ -1,0 +1,58 @@
+# Original brain-data benchmarks
+
+These experiments use donor-resolved single-nucleus components to construct bulk mixtures with known cellular contributions. They evaluate RNA fractions, individual expression recovery, continuous-phenotype associations and nominated-variant eQTLs.
+
+## Required prepared inputs
+
+The direct aggregation design separates 20 reference donors, 40 training donors and 40 evaluation donors, on 2,000 genes and seven cell types. The reference includes 39,692 nuclei. The required objects are listed in `reproduction/brain/DATA_REQUIREMENTS.txt`, including their original checksums:
+
+| Input | Role |
+|---|---|
+| `rosmap_heldout_benchmark_minimal.rds` | Original donor-resolved benchmark material |
+| `rosmap_reference_sce.rds` | Annotated reference single-nucleus counts |
+| `TRANSFER_TO_MAC_FRESH_V1/inputs/new_donor_scaffold.rds` | Fresh-donor scaffold |
+| `TRANSFER_TO_MAC_FRESH_V1/FRESH_REQUEST/request.rds` | Frozen fresh-donor request |
+
+These are structured prepared objects, not arbitrary replacement matrices. The preflight verifies exact input identity. The original study is described by [Mathys et al.](https://doi.org/10.1016/j.cell.2023.08.039). Access to source study data and a release of the matching prepared objects or upstream preparation code are needed for independent reproduction of this branch. They are not supplied in this GitHub package.
+
+## Configure paths once
+
+Edit `reproduction/brain/config.R` with the three input locations, a new output directory and the number of workers. The output directory must be separate from the inputs. Then run, from the repository root:
+
+```bash
+Rscript reproduction/brain/00_preflight.R reproduction/brain/config.R
+Rscript reproduction/brain/01_prepare.R reproduction/brain/config.R
+Rscript reproduction/brain/02_deconvolution_and_gam7.R reproduction/brain/config.R
+Rscript reproduction/brain/03_gam6.R reproduction/brain/config.R
+Rscript reproduction/brain/04_continuous_phenotype.R reproduction/brain/config.R
+Rscript reproduction/brain/05_eqtl.R reproduction/brain/config.R
+Rscript reproduction/brain/06_standard_bayesprism.R reproduction/brain/config.R
+Rscript reproduction/brain/07_paper_outputs.R reproduction/brain/config.R
+```
+
+The historical filename in part 02 is retained to preserve the audited engine and its original development sequence. Part 03 produces the six-feature model used in the paper; the current user API defaults to that six-feature model. Part 06 uses the original pooled-reference checks and CDSeq2 membership rule, then runs the **current standard BayesPrism** inference script. The superseded contribution-ranked BayesPrism analysis code is not included in this workflow.
+
+Part 07 rebuilds the brain-study tables and figures, including the 39-donor continuous sensitivity analysis. The independent-LD tables and figures are generated separately by the [independent benchmark](independent-eqtl.qmd). For part 07's schematic, set `CDSEQ2_FIGURE_PYTHON` to a Python executable with `reportlab` and `pypdfium2` installed.
+
+The brain input reader also needs `SingleCellExperiment` and `SummarizedExperiment`, available through Bioconductor. Preflight checks these dependencies explicitly. Preserve the recorded engines and checksums; modified models or data should be treated as a new experiment with a new output directory.
+
+## Experiments and paper outputs
+
+| Experiment | What it establishes | Main underlying tables |
+|---|---|---|
+| Direct aggregation | RNA-fraction accuracy and gene–type profile recovery against known components | S1, S2, S11–S14 |
+| Prioritization | Recovery enrichment with explicit retained fractions and counts | S1, S2, S11, S23, S24 |
+| Continuous traits | Donor-level associations and agreement with observed-component associations | S3, S4, S9, S16, S17, S25 |
+| Nominated eQTLs | Recovery and attribution of injected effects across three signal ratios and three repetitions | S5–S8, S10, S15, S18–S22 |
+
+## BayesPrism preprocessing
+
+The current comparison uses BayesPrism 2.2.3, pooled raw reference counts, one state per type and its `GEP` input interface. It applies `cleanup.genes()` with human groups `Rb`, `Mrp`, `other_Rb` and `chrM`, `exp.cells = 1`, followed by `new.prism()` with `outlier.cut = 0.01`, `outlier.fraction = 0.1` and `pseudo.min = 1e-8`. The chain length is 1,000, with 500 burn-in iterations and thinning of two; the full update is run.
+
+There is **no BayesPrism output selection**. Profiles removed by native input QC are tracked explicitly in Table S19. Missing tests remain in the fixed BH family as p = 1 before being reported as unavailable. The common-panel expression comparison uses only shared retained genes, while recall denominators preserve the original target definition.
+
+## Continuous-trait sensitivity
+
+The 39-donor analysis removes original donor 3 from all continuous-trait signal and null tests after identifying its influence. It preserves the original simulated trait values, expression inference and selection ranking, then recomputes the associations on the remaining donors. Table S25 retains the full-cohort comparison and diagnostics. This is a post hoc sensitivity analysis; improvement after removal does not by itself justify excluding a donor in a future biological study. Neither the separate expression/eQTL cohorts nor the independent synthetic-cohort benchmark uses that exclusion.
+
+The code in this branch has been packaged and its entry points checked. This book release does not claim a new full run from the original prepared brain-study inputs. The completed manuscript tables remain available for [saved-data reproduction](reproduce.qmd).

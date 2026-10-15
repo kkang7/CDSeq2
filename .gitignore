@@ -1,0 +1,13 @@
+book/_book/
+book/.quarto/
+book/.cache/
+.Rhistory
+.RData
+.Rproj.user/
+.DS_Store
+*.o
+*.so
+*.dll
+examples/output/
+work/
+__pycache__/

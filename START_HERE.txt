@@ -1,0 +1,28 @@
+CDSeq2: package + Quarto book + reproduction code in one repository
+
+1. Open book/_book/index.html to read the checked local book, or run:
+     quarto preview book
+2. Try the fully synthetic vignette after installing CDSeq2:
+     Rscript --vanilla examples/run_tutorial.R
+3. Set your GitHub username (repository name defaults to CDSeq2):
+     python3 tools/configure_github.py YOUR_GITHUB_USERNAME
+4. Push this folder's contents to your CDSeq2 GitHub repository.
+5. GitHub Settings -> Pages -> Source: GitHub Actions.
+6. Run the Publish Quarto book workflow (or push a change to main).
+
+No website has been published and no GitHub repository has been created.
+The book's Publishing chapter contains the exact steps for a new or existing repo.
+Keep an existing repository's .git history; this folder does not contain .git.
+
+Reproduction:
+- all 35 supplementary tables and 21 figures from manuscript revision 14;
+- complete four-part synthetic tutorial;
+- portable independent-cohort LD benchmark, frozen inputs and completed results;
+- original brain-study scripts with exact prepared-input requirements.
+The original prepared brain-study inputs are not included. Do not advertise that
+branch as public one-command reproduction until its input access/preparation
+release has been completed. See the book's Reproduction chapter.
+
+The R and C++ package implementation is copied unchanged from the shared CDSeq2
+folder. DESCRIPTION's minimum R version is 4.1 to match syntax already in source.
+The original shared folder has not been modified.

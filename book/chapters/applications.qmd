@@ -1,0 +1,53 @@
+# Connect expression to phenotype and genotype
+
+Individual-level cell-type expression lets a bulk cohort address questions that average reference profiles cannot: which cellular expression programs track a quantitative phenotype, and in which cell types do genetic variants associate with expression?
+
+## Continuous phenotypes
+
+For each gene–cell-type profile, relate within-type expression to a measured trait and appropriate covariates. With individual index $i$, a simple model is
+
+$$y_{gki}=\alpha_{gk}+\beta_{gk}t_i+\boldsymbol\gamma_{gk}^{\mathsf T}\mathbf c_i+\epsilon_{gki}.$$
+
+Here $y$ is normalized inferred expression, $t$ is the phenotype and $\mathbf c$ contains covariates such as age, sex and technical factors when justified by the design. The coefficient $\beta$ describes an association, not a causal effect.
+
+The runnable tutorial uses an unadjusted model because its samples are independent synthetic draws. For real data, define the adjustment model and assess design confounding. Donor-level plots help identify influential observations, nonlinear patterns and subgroup structure.
+
+The paper's brain benchmark compares inferred associations with associations in observed single-nucleus components. That reference is noisy and is not a complete list of true biological effects. The 39-donor analysis excludes one influential donor after inspection; [Supplementary Table S25](data.qmd) retains the 40-donor sensitivity comparison. The additional independent-cohort benchmark has no donor exclusion.
+
+## eQTL association
+
+Replace the phenotype with genotype dosage. For a cis-window analysis, test the prespecified variants near each gene, account for multiple variants, then adjust across the fixed gene–cell-type family. The independent benchmark uses Bonferroni adjustment of each gene's minimum SNP p value followed by global Benjamini–Hochberg adjustment.
+
+The tutorial contains one simulated variant and illustrates a simple OLS association. It is not a complete real-cohort cis-eQTL pipeline. A real analysis also needs genotype QC, sample matching, ancestry and relatedness handling, genomic coordinates, covariate design and a justified multiple-testing strategy.
+
+## Keep testing and prioritization distinct
+
+```r
+# 'tests' has one row per member of the prespecified testing family.
+tests$q <- p.adjust(replace(tests$p, !is.finite(tests$p), 1), "BH")
+tests$called_without_prioritization <- is.finite(tests$p) & tests$q <= 0.05
+
+key <- function(x) paste(x$gene, x$cell_type, sep = "|")
+ix <- match(key(tests), key(selected))
+stopifnot(!anyNA(ix))
+tests$called_with_prioritization <-
+  tests$called_without_prioritization & selected$retained[ix]
+```
+
+This applies selection after the full-family adjustment and leaves every p and q value unchanged. Recomputing BH only on selected profiles is a different procedure, and is not the paper's comparison.
+
+## Measure accuracy and coverage together
+
+| Metric | Definition with known injected truth |
+|---|---|
+| Precision | True discoveries / all discoveries |
+| Full-target recall | True discoveries / all injected targets, including unselected targets |
+| F1 | $2\,\mathrm{precision}\,\mathrm{recall}/(\mathrm{precision}+\mathrm{recall})$ |
+| FDP | False discoveries / all discoveries; defined as zero for zero-call replicate FDP summaries |
+| Expression recovery | Across-donor correlation between inferred and known within-type profiles |
+
+Precision is undefined when there are no discoveries; zero calls are not evidence of perfect precision. The nominated-variant benchmark uses directional correctness, including the sign of the effect. The independent-LD benchmark evaluates directly injected gene–type targets, not correct identification of the causal SNP.
+
+Prioritization can raise precision while lowering F1 because F1 also penalizes missed targets. This supports focused follow-up when accuracy is important, while full CDSeq2 output supports broader discovery. The [precision–recall figures](figures.qmd#figure-5) make that choice visible.
+
+Matched empirical FDP comparisons in the paper choose thresholds using simulation truth. They describe achievable accuracy–coverage tradeoffs retrospectively; they are not thresholds a user can deploy without truth. The independent benchmark instead evaluates a frozen rule prospectively within the simulation design.

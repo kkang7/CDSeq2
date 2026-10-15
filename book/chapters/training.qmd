@@ -1,0 +1,61 @@
+# Train and validate a scorer
+
+Training requires known individual-level cell-type components. They can come from donor-resolved single-cell aggregation or a simulation with a declared truth. Ordinary bulk counts alone do not supply the training response.
+
+## Separate reference, training and validation donors
+
+Use reference donors to build the reference, development donors to fit the scorer, and untouched validation donors to assess it. Repeated simulations of one biological donor retain that donor's original identity. Relabeling samples does not make them independent.
+
+The synthetic tutorial implements the entire pattern in `examples/03_prioritize.R`:
+
+```r
+training_benchmark <- CDSeq2::prepare_variation_benchmark(
+  bulk = training_bulk,
+  reference_mean = reference_mean,
+  rna_fractions = training_rna_fractions,
+  estimated_counts = training_estimated_counts,
+  truth_counts = training_true_counts,
+  donor_ids = training_donor_ids,
+  reference_donor_ids = reference_donor_ids,
+  cohort_id = "training_cohort",
+  oracle = "direct_observed_component_counts"
+)
+
+scorer <- CDSeq2::train_variation_scorer(
+  benchmarks = training_benchmark,
+  context = list(
+    application = "Individual expression recovery",
+    tissue = "Describe the tissue and condition",
+    deconvolution_method = "CDSeq2",
+    fit_settings = list(reference_precision = 1e6,
+                        estimator = "estGEP_count + estProp")
+  ),
+  folds = 5L, seed = 1L, min_profiles = 100L, model = "GAM6"
+)
+CDSeq2::save_variation_scorer(scorer, "my_context_scorer.rds")
+```
+
+The example `context` must describe the actual run, including chain settings, normalization and any other changed inference options. `donor_ids` is a named character vector mapping sample names to donor IDs. Counts must use exactly aligned genes × types × samples axes. Zero-library profiles cannot supply defined recovery targets.
+
+## Evaluate on new donors
+
+Prepare a second benchmark with validation bulk, inferred components, known components and validation donor IDs. Use the same panel, type labels, oracle and normalization as training:
+
+```r
+validation <- CDSeq2::validate_variation_scorer(
+  scorer, benchmarks = validation_benchmark
+)
+validation$donor_checks
+validation$metrics
+validation$predictions
+```
+
+Grouped gene cross-validation is useful during development, but does not hold out donors. Use `gene_groups` when linked genes or correlated construction units must stay in the same fold. Once validation results inform model selection, use a further untouched evaluation set to assess the chosen specification.
+
+In the paper, the six-feature specification was chosen after reviewing earlier evaluation results. The additional independent synthetic-cohort eQTL benchmark freezes that scorer, target-generation rules and retention fraction before generating its test outcomes. Both provenance statements matter when interpreting the evidence.
+
+## Optional mixture simulation
+
+`simulate_variation_mixtures()` can sample bulk reads from donor-resolved component arrays and chosen library sizes and RNA fractions. It returns both expected components and realized allocated reads. Choose one target definition and keep it consistent across development and validation. A shared reference mean by itself cannot generate realistic known donor variation.
+
+The model predicts expression recovery. Its validation does not automatically validate phenotype associations, cell-type attribution or FDR control. Those require their own evaluation, as shown in the [eQTL benchmark](independent-eqtl.qmd).

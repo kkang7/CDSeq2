@@ -1,0 +1,49 @@
+# Publish the book from the CDSeq2 repository
+
+The R package and Quarto book live in one repository. The included workflow renders the book when changes reach `main` and publishes the resulting website through GitHub Pages. Long simulations never run during this website build.
+
+## 1. Set the repository owner
+
+From the repository root:
+
+```bash
+python3 tools/configure_github.py YOUR_GITHUB_USERNAME --repo CDSeq2
+```
+
+This updates public repository links and installation examples. It does not upload files, create a repository or publish a website. The repository owner is the only unresolved location setting in this delivery.
+
+## 2. Preview locally
+
+```bash
+quarto render book
+python3 tools/check_book.py
+quarto preview book
+```
+
+Quarto 1.7.32 is used in the checked build and pinned in the workflow. Edit the chapter `.qmd` files under `book/chapters/` and the navigation in `book/_quarto.yml`. Statistical examples are displayed as code; run the separate tutorial to regenerate its results.
+
+## 3. Push to GitHub
+
+Create an empty GitHub repository named **CDSeq2**. If this is a new checkout, run the following after replacing the owner:
+
+```bash
+git init -b main
+git add .
+git commit -m "Add CDSeq2 package, Quarto guide and reproducibility workflows"
+git remote add origin https://github.com/YOUR_GITHUB_USERNAME/CDSeq2.git
+git push -u origin main
+```
+
+If you already have a CDSeq2 repository, copy these files into a working branch and review the changes, preserving your existing Git history. Do not initialize another repository inside it. The source package's R and C++ files in this delivery match the shared package; the R minimum version metadata is adjusted to 4.1 to match existing native-pipe syntax.
+
+## 4. Enable GitHub Pages
+
+In the repository, open **Settings → Pages** and choose **GitHub Actions** as the source. Then open **Actions → Publish Quarto book → Run workflow**, or push another change to `main`. The completed deployment links to the website, normally under your account's GitHub Pages domain with `/CDSeq2/` as the project path.
+
+The workflow uses relative book links, a Pages artifact and GitHub's deployment action. No personal access token is needed for this workflow. Repository and organization settings can restrict Pages availability. The setup follows the [GitHub custom workflow documentation](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages) and [Quarto's GitHub Pages guide](https://quarto.org/docs/publishing/github-pages.html).
+
+## Maintain a research release
+
+Tag the package and book revision used for the submitted paper. Archive the exact code, data assets and environment with a persistent release identifier when available. Add that identifier and the final manuscript citation to the [references page](references.qmd). Keep raw study inputs and generated native-fit caches outside Git; the included `.gitignore` excludes the `work/` directory.
+
+This book includes a synthetic teaching example, saved manuscript tables and a compact benchmark archive. The original prepared brain-study inputs still need a documented access/release path. Review the [data inventory](data.qmd) before announcing the scope of public reproduction.

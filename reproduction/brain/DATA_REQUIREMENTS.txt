@@ -1,0 +1,27 @@
+Required study inputs (not included)
+
+1. rosmap_heldout_benchmark_minimal.rds
+   MD5 1bb46db5e1b8f69088dd273deb9c3ead
+2. rosmap_reference_sce.rds
+   MD5 2831486744ba826a824145398c9a6991
+3. TRANSFER_TO_MAC_FRESH_V1/inputs/new_donor_scaffold.rds
+   MD5 9c341b5907dd16338365665ef3414a27
+4. TRANSFER_TO_MAC_FRESH_V1/FRESH_REQUEST/request.rds
+   MD5 6057b67c1ccdead0306fe14c20fb36e0
+
+The transfer_dir setting points to the directory containing inputs/ and
+FRESH_REQUEST/. Preserve that structure. These are preprocessed R objects, not
+arbitrary expression matrices. The original engines explicitly verify study
+identity and reject replacement files. MD5 is used for file identity, not security.
+
+The preparation engine derives direct donor mixtures and corresponding true
+cell-type components from these objects and validates donor separation and panel
+alignment. Raw-reference input includes 39,692 nuclei for the reference donors.
+See engines/direct.R for the exact schema checks and aggregation implementation.
+
+An external reader needs approved access to the underlying ROSMAP resources and
+the exact prepared objects, or a separately released preprocessing workflow that
+creates them. This bundle does not fill that upstream data-access/preprocessing
+gap. Do not describe it as a public one-command reproduction until this is resolved.
+For an unrestricted demonstration, release a separate synthetic/toy dataset and
+example workflow; the current study-specific engines intentionally reject it.

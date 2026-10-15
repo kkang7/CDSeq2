@@ -1,0 +1,68 @@
+# Prioritize gene–cell-type profiles
+
+CDSeq2's prioritization component predicts how well a gene's inferred expression profile is likely to track variation across individuals within a cell type. It uses observable expression and mixture features, without using phenotypes, genotypes or association p values.
+
+## Load a suitable model
+
+```r
+scorer <- CDSeq2::load_variation_scorer("my_context_scorer.rds")
+CDSeq2::check_variation_scorer(scorer)
+scorer$context
+scorer$fit_settings
+```
+
+There is no automatically installed universal variation scorer. Use a model trained and validated for your setting, or follow [model training](training.qmd). The package's older differential-expression scorer files are a different API and are not substitutes for a variation scorer.
+
+## Construct the reference mean
+
+For the pooled reference convention used in the tutorial and paper, sum raw reference counts within each type and normalize each column. This is the **unsmoothed reference mean**, distinct from the smoothed inference prior and from the inferred donor expression profiles.
+
+```r
+types <- unique(cell_type)
+reference_mean <- vapply(types, function(ct) {
+  rowSums(reference[, cell_type == ct, drop = FALSE])
+}, numeric(nrow(reference)))
+dimnames(reference_mean) <- list(rownames(reference), types)
+reference_mean <- sweep(reference_mean, 2, colSums(reference_mean), "/")
+
+features <- CDSeq2::prepare_variation_features(
+  bulk = bulk,
+  reference_mean = reference_mean,
+  rna_fractions = rna_fractions,
+  scorer = scorer
+)
+scores <- CDSeq2::score_variation(features, scorer, range_action = "flag")
+selected <- CDSeq2::select_variation_profiles(scores, fraction = 0.2)
+```
+
+## Six features, one profile score
+
+| Feature | Information it contributes |
+|---|---|
+| Mean contribution | Expected share of a gene's mixture signal attributable to the type |
+| Expected read support | Typical modeled reads supporting that gene–type profile |
+| Reference specificity | How strongly the reference distinguishes the type for that gene |
+| Bulk variability | Across-sample variation in bulk log-expression |
+| Maximum donor read share | Whether one donor dominates the gene's observed reads |
+| Expression–fraction correlation | Association between bulk gene expression and the type's RNA fraction |
+
+GAM6 fits a model separately for each cell type. Its target is Fisher-transformed across-donor Pearson recovery. The returned `variation_score` equals 100 times the nonnegative part of the predicted correlation. It is a ranking score, not a probability that a gene–type pair is correct or significant.
+
+**Contribution ranking**, a comparison baseline in the paper, sorts profiles by the first feature alone: the expected share of a gene's bulk signal attributable to the cell type. Expected-count ranking instead sorts by modeled read support. Neither is an output-selection procedure attributed to BayesPrism in the current comparison.
+
+## Choose and report a retained fraction
+
+Selection is within each cell type, among finite scores. It sorts descending by score and breaks ties by gene name. A fraction of 0.2 retains the floor of 20% of the eligible profiles. Keep both selected and unselected rows in the exported data.
+
+```r
+do.call(rbind, lapply(split(selected, selected$cell_type), function(d) {
+  data.frame(cell_type = d$cell_type[1],
+             total = nrow(d), eligible = sum(is.finite(d$variation_score)),
+             retained = sum(d$retained), fraction_total = mean(d$retained))
+}))
+table(scores$outside_training_range, useNA = "ifany")
+```
+
+The default range policy flags out-of-range features while retaining finite predictions. `range_action = "abstain"` is a different policy that can change eligibility and coverage. Choose it explicitly and report it.
+
+Prioritization trades coverage for enrichment. Set the fraction before evaluating downstream truth or choosing favorable association results. Use full-target recall, selected counts and precision alongside any recovery improvement. The paper uses 20% for several expression analyses and 40% for the primary eQTL analyses; those fractions are benchmark choices, not universal error-control thresholds.
