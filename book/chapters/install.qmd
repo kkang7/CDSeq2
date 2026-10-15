@@ -1,29 +1,23 @@
 # Install CDSeq2
 
-## Install from this repository
+## Install from GitHub
 
 Use R 4.1 or newer, a C++ toolchain suitable for R packages, and an internet connection for dependencies. The bundled tutorial was tested with R 4.6.1 and CDSeq2 0.0.0.9000. The [paper benchmark](independent-eqtl.qmd) records a stricter environment for numerical replay.
 
-From the repository root in a terminal:
-
-```bash
-Rscript tools/install_dependencies.R
-R CMD INSTALL .
-```
-
-The helper installs missing CRAN dependencies and `limma` through Bioconductor without updating already installed packages. It does not install the CDSeq2 package until you run the second command.
-
-After the repository is public, installation from R is also possible:
+Run the following in R to install CDSeq2 from [its GitHub repository](https://github.com/kkang7/CDSeq2):
 
 ```r
 install.packages("remotes")
-if (!requireNamespace("BiocManager", quietly = TRUE))
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
   install.packages("BiocManager")
-BiocManager::install("limma", ask = FALSE, update = FALSE)
-remotes::install_github("{{< var github_owner >}}/{{< var repository >}}")
+}
+if (!requireNamespace("limma", quietly = TRUE)) {
+  BiocManager::install("limma", ask = FALSE, update = FALSE)
+}
+remotes::install_github("kkang7/CDSeq2")
 ```
 
-Replace `YOUR_GITHUB_USERNAME` if the repository owner has not yet been configured. No public CDSeq2 repository address is assumed in this draft.
+These commands install the Bioconductor dependency `limma` if needed, then install CDSeq2 and its remaining required dependencies from GitHub and CRAN.
 
 ## Check the installation
 

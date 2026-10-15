@@ -4,29 +4,26 @@ Reference-based individual-level cell-type expression inference with optional ge
 
 This repository contains the R package, a Quarto book and reproduction workflows for the accompanying manuscript. The book covers installation, a complete synthetic tutorial, analysis of new data, scorer training and validation, phenotype/eQTL applications, all manuscript figures and underlying tables.
 
-## Install and try
+## Installation
 
-```bash
-Rscript tools/install_dependencies.R
-R CMD INSTALL .
-Rscript --vanilla examples/run_tutorial.R
+Run the following in R:
+
+```r
+install.packages("remotes")
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
+  install.packages("BiocManager")
+}
+if (!requireNamespace("limma", quietly = TRUE)) {
+  BiocManager::install("limma", ask = FALSE, update = FALSE)
+}
+remotes::install_github("kkang7/CDSeq2")
 ```
 
-The example generates its own data and writes `examples/output/`. Its four scripts can also be read separately. R >= 4.1 and a working package compilation toolchain are required.
+R >= 4.1 and a working package compilation toolchain are required. The commands above install the Bioconductor dependency `limma` before installing CDSeq2.
 
-## Read and publish the book
+## Documentation
 
-```bash
-quarto preview book
-```
-
-Before publishing, configure your repository owner:
-
-```bash
-python3 tools/configure_github.py YOUR_GITHUB_USERNAME --repo CDSeq2
-```
-
-Push the repository to GitHub and set **Settings → Pages → Source → GitHub Actions**. The included **Publish Quarto book** workflow renders and deploys the website on pushes to `main`, or when run manually. See `book/chapters/publishing.qmd` for the complete steps. No repository or website has been created by this local delivery.
+Read the [CDSeq2 Quarto book](https://kkang7.github.io/CDSeq2/) for tutorials, analysis workflows and manuscript reproduction instructions.
 
 ## Reproduce the manuscript
 
