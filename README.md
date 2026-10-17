@@ -32,7 +32,7 @@ python3 reproduction/reproduce.py tables
 python3 reproduction/reproduce.py independent-prepare
 ```
 
-See `book/chapters/reproduce.qmd` for commands to rebuild all 21 figures and run the native independent eQTL benchmark. Statistical figures use the 35 included CSV tables. Figure 1 also requires Python with reportlab and pypdfium2. The original brain-data analyses require prepared study inputs that are listed in `reproduction/brain/DATA_REQUIREMENTS.txt` and are not included.
+See `book/chapters/reproduce.qmd` for commands to rebuild all 21 figures and run the native independent eQTL benchmark. Statistical figures use the 35 included CSV tables. Figure 1 also requires Python with reportlab and pypdfium2. The original brain-data analyses require downloaded ROSMAP data. See [the preprocessing workflow](reproduction/brain/preprocessing/README.md) to reconstruct the required inputs, including resource requirements and the limits of current validation.
 
 The comparison is standard BayesPrism versus CDSeq2 without and with gene-type prioritization. Prioritization selects profiles from the same CDSeq2 fit; it does not change expression or association p values. Report accuracy and coverage together.
 

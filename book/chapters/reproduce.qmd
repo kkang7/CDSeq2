@@ -49,7 +49,7 @@ python3 reproduction/reproduce.py independent-figures
 
 ## Part 4: original brain-data experiments
 
-The [brain benchmark chapter](brain-benchmarks.qmd) gives the ordered scripts, inputs, seeds and current BayesPrism preprocessing. The scripts are included, but the prepared donor-resolved study objects are not. Their upstream public-access/preprocessing release remains an author action. Use the fully synthetic tutorial and the compact independent benchmark while those inputs are unavailable.
+The [brain benchmark chapter](brain-benchmarks.qmd) gives the ordered scripts, inputs, seeds and current BayesPrism preprocessing. The scripts are included, but the prepared donor-resolved study objects are not. The repository now includes a reconstruction workflow from the downloaded ROSMAP objects, with frozen selections and numerical identity checks. Its complete raw-data execution remains unverified; see the brain benchmark chapter for validation limits. The synthetic tutorial and compact independent benchmark can be run separately.
 
 ## Reproduction records
 

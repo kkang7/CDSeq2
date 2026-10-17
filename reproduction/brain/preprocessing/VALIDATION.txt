@@ -1,0 +1,11 @@
+Validation on 2026-10-15
+
+PASS: all preprocessing R sources parse.
+PASS: original archived numerical identities.
+PASS: minimal reserialization accepted by actual downstream .da_inputs reader.
+PASS: downstream dimensions 2000 genes, 7 types, 40 training, 40 evaluation, 39692 reference nuclei.
+PASS: changed count and donor rejected on archived data.
+PASS: synthetic contract test rejects changed count, donor, fit and reference.
+PASS: all 17 Quarto pages rendered; local links, downloads, figures and tables checked.
+
+NOT EXECUTED: complete 174-GiB source-file rehash, clustering and newly aggregated input reconstruction. No new inference or figures generated.

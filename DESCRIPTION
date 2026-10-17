@@ -6,10 +6,7 @@ Authors@R:
      family="Kang",
      email = "kangkai0714@gmail.com",
      role = c("aut", "cre"),
-     comment = c( ORCID = "0000-0002-4348-3941")),
-     person(given="He",
-     family="Liang",
-     role="aut"))
+     comment = c( ORCID = "0000-0002-4348-3941")))
 Description: Deconvolve bulk RNAseq on individual level and infer cell type-specific differential expression.
 License: MIT + file LICENSE
 Encoding: UTF-8

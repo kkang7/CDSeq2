@@ -19,9 +19,13 @@ cell-type components from these objects and validates donor separation and panel
 alignment. Raw-reference input includes 39,692 nuclei for the reference donors.
 See engines/direct.R for the exact schema checks and aggregation implementation.
 
-An external reader needs approved access to the underlying ROSMAP resources and
-the exact prepared objects, or a separately released preprocessing workflow that
-creates them. This bundle does not fill that upstream data-access/preprocessing
-gap. Do not describe it as a public one-command reproduction until this is resolved.
-For an unrestricted demonstration, release a separate synthetic/toy dataset and
-example workflow; the current study-specific engines intentionally reject it.
+Generate these inputs from the downloaded AD/Aging Brain Atlas objects using
+preprocessing/run.R; see preprocessing/README.md for exact commands and files.
+The original MD5 values above identify archived serializations. Regenerated files
+may have different bytes and are accepted only if their numerical signatures
+match preprocessing/expected_content.csv. Data, donor ordering, reference nuclei,
+counts and inference settings remain fixed. No mismatched input is accepted.
+
+The wrapper/output contract has been tested using archived numerical inputs and
+mutation checks. Full raw-data clustering and reconstruction have not been rerun.
+Downloaded data and generated RDS objects are not included in this repository.

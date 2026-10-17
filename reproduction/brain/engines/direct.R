@@ -227,9 +227,16 @@ function (raw, bulk, types, cfg)
   .da_assert(all(file.exists(files)),'Missing input: ',paste(files[!file.exists(files)],collapse=', '))
   expected<-c(training='1bb46db5e1b8f69088dd273deb9c3ead',reference='2831486744ba826a824145398c9a6991',
     scaffold='9c341b5907dd16338365665ef3414a27')
-  for(nm in names(expected)).da_assert(identical(.da_md5(files[nm]),unname(expected[nm])),
-    'Wrong/changed ',nm,' input. Use the verified original file, not a simulated-count replacement.')
   b<-readRDS(training_file);v<-readRDS(scaffold_file);req<-readRDS(request_file)
+  # Accept a regenerated serialization only when its numerical content matches
+  # the frozen manuscript inputs. The original RDS hashes remain the fast path.
+  original <- identical(unname(tools::md5sum(files[names(expected)])),unname(expected)) &&
+    identical(.da_md5(request_file),'6057b67c1ccdead0306fe14c20fb36e0')
+  if(!original) {
+    pre <- file.path(dirname(dirname(.da_script)),'preprocessing')
+    ce <- new.env(parent=.GlobalEnv);sys.source(file.path(pre,'contract.R'),ce)
+    ce$rosmap_verify_objects(b,readRDS(reference_file),v,req,file.path(pre,'expected_content.csv'))
+  }
   genes<-as.character(b$gene_panel);types<-as.character(b$major_celltypes)
   samples<-colnames(b$pseudobulk_counts)
   .da_assert(length(genes)==2000L&&length(types)==7L&&length(samples)==40L,'Unexpected training dimensions')

@@ -2,7 +2,7 @@
 
 ## CDSeq2
 
-The CDSeq2 manuscript is in preparation. This book accompanies revision 14; a final article citation, DOI and software archive DOI have not yet been assigned here. Package authorship and licensing remain as recorded in the package `DESCRIPTION` and `LICENSE` files. The shared package currently credits Kai Kang and He Liang; the manuscript's author list is a separate record.
+The CDSeq2 manuscript is in preparation. This book accompanies revision 14; a final article citation, DOI and software archive DOI have not yet been assigned here. Package authorship and licensing remain as recorded in the package `DESCRIPTION` and `LICENSE` files.
 
 The original CDSeq method is described in Kang K, Meng Q, Shats I, et al. **CDSeq: A novel complete deconvolution method for dissecting heterogeneous samples using gene expression data.** PLoS Computational Biology (2019). [Article](https://doi.org/10.1371/journal.pcbi.1007510).
 

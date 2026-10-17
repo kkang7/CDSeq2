@@ -13,7 +13,25 @@ The direct aggregation design separates 20 reference donors, 40 training donors 
 | `TRANSFER_TO_MAC_FRESH_V1/inputs/new_donor_scaffold.rds` | Fresh-donor scaffold |
 | `TRANSFER_TO_MAC_FRESH_V1/FRESH_REQUEST/request.rds` | Frozen fresh-donor request |
 
-These are structured prepared objects, not arbitrary replacement matrices. The preflight verifies exact input identity. The original study is described by [Mathys et al.](https://doi.org/10.1016/j.cell.2023.08.039). Access to source study data and a release of the matching prepared objects or upstream preparation code are needed for independent reproduction of this branch. They are not supplied in this GitHub package.
+These are structured prepared objects, not arbitrary replacement matrices. The original study is described by [Mathys et al.](https://doi.org/10.1016/j.cell.2023.08.039). Download the nine processed Seurat objects and deidentified participant metadata from the [AD/Aging Brain Atlas](https://compbio.mit.edu/ad_aging_brain/).
+
+## Generate the prepared inputs
+
+The repository includes the original clustering and primary preparation engines, frozen donor and gene selections, and a wrapper in `reproduction/brain/preprocessing/`. Its [instructions](https://github.com/kkang7/CDSeq2/tree/main/reproduction/brain/preprocessing) list the required filenames, dependencies, resource needs and validation status.
+
+Run from the repository root, replacing the three paths with separate source, working and output directories:
+
+```bash
+Rscript reproduction/brain/preprocessing/run.R cluster /path/to/ROSMAP_AD /path/to/rosmap_work /path/to/rosmap_inputs
+Rscript reproduction/brain/preprocessing/run.R build /path/to/ROSMAP_AD /path/to/rosmap_work /path/to/rosmap_inputs
+Rscript reproduction/brain/00_preflight.R /path/to/rosmap_inputs/brain_config.R
+```
+
+The source files total approximately 174 GiB and clustering needs substantial additional memory and disk space. Training/reference inputs use the original cluster filtering; evaluation inputs aggregate the original downloaded nuclei for the frozen evaluation donors. Generated objects are exported only if their numerical content matches the manuscript inputs. RDS serialization differences are allowed; changed counts or donor identities are rejected.
+
+**Validation scope:** the reconstructed object format passes the downstream reader when populated with archived numerical inputs, and mutation tests confirm rejection of altered inputs. The full download-to-clustering reconstruction has not been rerun. Source or clustering-version differences can cause the identity check to stop. This is not a claim of newly verified end-to-end raw-data reproduction.
+
+The successful build writes `brain_config.R`; use that path as the configuration argument in parts 01–07 below. Alternatively, configure paths to the original archived inputs as follows.
 
 ## Configure paths once
 
