@@ -88,7 +88,9 @@ for d in summary:
 print(f'PASS: all {len(m):,} profile memberships, 63 ranking groups and {len(summary)} count/summary rows.')
 print(f'PASS: common-panel genes match BayesPrism QC; {matched:,} scores match archived nominated-test scores.')
 print('PASS: ranks use only archived score/gene ties; undefined truth correlations do not affect membership.')
-print('PASS: 394 selected per scenario/type; 3,546 / 17,733 pooled per type (19.996616%).')
+for d in summary:
+    if d['scenario']=='ALL' and d['workflow']=='CDSeq2+GAM6':
+        print(f"PASS: {d['cell_type']}: {d['n_retained']} / {d['n_common_panel']} profiles retained ({100*float(d['retained_proportion']):.6f}%).")
 if len(sys.argv) > 2:
     old = Path(sys.argv[2])
     # Compare the seven source/result tables used by this expression benchmark;

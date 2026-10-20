@@ -2,7 +2,7 @@
 
 ## Install from GitHub
 
-Use R 4.1 or newer, a C++ toolchain suitable for R packages, and an internet connection for dependencies. The bundled tutorial was tested with R 4.6.1 and CDSeq2 0.0.0.9000. The [paper benchmark](independent-eqtl.qmd) records a stricter environment for numerical replay.
+Use R 4.1 or newer, a C++ toolchain suitable for R packages, and an internet connection for dependencies. The bundled tutorial was tested with R 4.6.1 and CDSeq2 0.1.0. The [paper benchmark](independent-eqtl.qmd) records a stricter environment for numerical replay using its archived inference source.
 
 Run the following in R to install CDSeq2 from [its GitHub repository](https://github.com/kkang7/CDSeq2):
 
@@ -18,6 +18,8 @@ remotes::install_github("kkang7/CDSeq2")
 ```
 
 These commands install the Bioconductor dependency `limma` if needed, then install CDSeq2 and its remaining required dependencies from GitHub and CRAN.
+
+The tested [CDSeq2 0.1.0 source archive](../downloads/CDSeq2_0.1.0.tar.gz) is also provided with this edition of the book.
 
 ## Check the installation
 

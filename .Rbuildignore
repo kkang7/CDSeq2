@@ -12,3 +12,8 @@
 ^FILE_MANIFEST\.csv$
 ^LICENSE\.md$
 ^\.gitignore$
+^CITATION\.cff$
+^release$
+^renv$
+^renv\.lock$
+^reproducibility\.json$

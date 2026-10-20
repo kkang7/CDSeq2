@@ -1,0 +1,10 @@
+library(CDSeq2)
+path<-'book/downloads/brain_GAM6_release_0.1.0.rds'
+s<-load_variation_scorer(path);check_variation_scorer(s)
+p<-score_variation(s$sentinel$features,s)
+stopifnot(all(is.finite(p$variation_score)))
+y<-select_variation_profiles(p,.4);r<-summarize_variation_selection(y)
+stopifnot(sum(r$retained)==sum(y$retained))
+f<-s$sentinel$features;f$cell_type[1]<-'unsupported_type';p<-score_variation(f,s)
+stopifnot(p$status[1]=='unsupported_cell_type',is.na(p$variation_score[1]))
+message('PASS: frozen scorer replay, unsupported-type handling and selection report.')

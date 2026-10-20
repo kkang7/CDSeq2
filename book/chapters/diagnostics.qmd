@@ -1,0 +1,27 @@
+# Prioritization and stability diagnostics
+
+These additional analyses use the fixed v15 inference results and accompany manuscript v16. They were designed after the primary results were inspected and do not change its scoring rule, cohort or association tests.
+
+## Do higher scores identify better profiles?
+
+[Figure 7](figures.qmd#figure-7) groups targets by frozen score within each independent cohort and cell type. Expression recovery and eQTL precision are different endpoints. Higher-score excitatory-neuron groups show strong expression-recovery enrichment; association precision is noisier and is not a calibrated score probability. [Figure S16](supplementary.qmd#figure-s16) includes all seven types.
+
+## Does the model add value beyond simpler rankings?
+
+The 40% budget is shared by GAM6, contribution ranking, expected-count ranking and 100 random subsets per cohort. In the principal excitatory-neuron setting, precision is 92.6%, 92.7%, 88.9% and 77.5%, respectively. Contribution ranking is competitive and is stronger in some stress settings. Tables S37–S38 retain all controls and outcomes. Uncertainty resamples whole cohorts, preserving paired comparisons; random draws are averaged within a cohort. Five cohorts per setting limit interval precision.
+
+## Why do some null phenotypes produce many calls?
+
+Null traits 10, 55 and 112 produce 4,011, 4,702 and 4,467 calls. Among these called profiles, 96.4% have their largest centered-expression contribution from donor 38, who has very sparse inferred profiles in several types. The inferred log-CPM profiles also share a stronger leading component than observed profiles. Chance alignment of these null phenotypes with that common pattern is consistent with the coordinated rejections, although these diagnostics do not identify which inference step created the pattern.
+
+Additional omission of donor 38 eliminates calls for those three traits, but **no additional donor is removed from the primary results**. Bursts also occur with all 40 donors. CPM and log-count sensitivities show dependence on response transformation; they do not justify choosing a favorable normalization from these outcomes. [Figure S18](supplementary.qmd#figure-s18) and Tables S39–S40 and S42 report the diagnosis.
+
+Any rejection occurs for 2.5% of the 200 continuous null phenotypes, so the bursts alone do not establish excess global-null FDR. The separate LD-aware full-family null rejection of 10.5% after prioritization remains above nominal 5%. Prioritization helps identify supported candidates but is not an error-control procedure.
+
+## Repeat the audit
+
+```bash
+python3 reproduction/reproduce.py diagnostics --out work/diagnostic-check
+```
+
+The compact inputs, source hashes and independent count checks are in the release downloads. Tables S36–S42 document score-group counts, controls, cohort-bootstrap uncertainty, null sensitivities and donor-level support.

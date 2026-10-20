@@ -1,14 +1,18 @@
-# Documentation delivery — 15 October 2026
+# CDSeq2 0.1.0 — manuscript version 16
 
-- Added a Quarto book in the same repository as the existing R package.
-- Added a fully synthetic four-part tutorial using the public CDSeq2 variation API.
-- Included revision-14 figure assets, complete captions, 35 unchanged supplementary CSVs and explicit figure-to-table links.
-- Added one entry point for table extraction, all-figure regeneration and independent-cohort benchmark execution.
-- Preserved the frozen independent benchmark and exact package source snapshot in a downloadable archive.
-- Added current standard BayesPrism entry points for the original brain-data workflow. Its native input preprocessing is applied and no output selection is used for BayesPrism.
-- Added GitHub Pages deployment, local checks and one-command repository-owner configuration.
-- Preserved existing package source code, authorship and license. The minimum R version is 4.1 because the existing implementation uses native pipes; documentation/build exclusions were added.
+This prepared release synchronizes the package, Quarto book, 42 supplementary
+tables, 25 figures, reconstructed brain inputs and independent LD benchmark.
+It adds a directly loadable frozen brain scorer with a model description,
+`summarize_variation_selection()`, package tests, Linux/macOS CI, citation
+metadata and a benchmark dependency lock. Inference/scoring functions are unchanged.
 
-The paper's historical numerical files retain machine labels for reproducibility. Reader-facing text uses full cell-type names and the distinction between CDSeq2 with and without gene-type prioritization. Model development provenance, the post hoc 39-donor continuous sensitivity and accuracy/coverage tradeoffs remain documented.
+Additional analyses compare score groups and equally sized ranking/random subsets,
+with paired cohort-bootstrap uncertainty, and diagnose continuous-null instability.
+They reuse the completed v15 fits. All primary v15 numerical results remain intact.
+Contribution ranking performs similarly to GAM6 in the principal eQTL setting.
+Donor-38 sparse profiles drive the largest continuous-null call bursts; neither
+another donor omission nor a new normalization is applied to primary analyses.
 
-The shared source directory was not modified. The book does not assign a final manuscript DOI or invent a GitHub owner. Original study input release remains outstanding. Native experiment runs completed earlier are distinguished from this delivery's tutorial and saved-data validation.
+The v14 table archive is replaced by v16 material. Historical clustering audit
+files remain identified as historical; current reproduction uses ReconstructedData.
+See VALIDATION.txt for completed checks and outstanding external release steps.

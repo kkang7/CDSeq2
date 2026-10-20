@@ -37,3 +37,7 @@ help("validate_variation_scorer", package = "CDSeq2")
 **My numeric results differ slightly.** Check the estimator, normalization, seed, chain settings, R and dependency versions. Use the frozen source archive for paper replay. Different native libraries or platforms can affect floating-point and Monte Carlo results.
 
 **A cache or lock fails a check.** Read the reported mismatch. Use a new output directory for changed designs. Do not bypass identity checks or reuse incomplete data as a completed run.
+
+## Summarize selection
+
+`CDSeq2::summarize_variation_selection(selected)` reports retained coverage, undefined scores, unsupported types and out-of-range features by cell type. It does not alter inference, p values or selection.

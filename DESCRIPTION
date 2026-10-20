@@ -1,13 +1,15 @@
 Package: CDSeq2
-Title: Individual-Level Deconvolution and Cell Type-Specific Differential Expression Analysis
-Version: 0.0.0.9000
+Title: Individual-Level Cell-Type Expression and Gene-Type Prioritization
+Version: 0.1.0
 Authors@R: 
      c(person(given="Kai",
      family="Kang",
      email = "kangkai0714@gmail.com",
      role = c("aut", "cre"),
      comment = c( ORCID = "0000-0002-4348-3941")))
-Description: Deconvolve bulk RNAseq on individual level and infer cell type-specific differential expression.
+Description: Reference-informed Bayesian inference of individual-level cell-type expression
+    and RNA fractions from bulk RNA sequencing, with optional prediction and
+    prioritization of recoverable gene-cell-type expression profiles.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

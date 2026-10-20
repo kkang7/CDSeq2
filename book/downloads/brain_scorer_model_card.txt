@@ -1,0 +1,19 @@
+CDSeq2 brain GAM6 model for release 0.1.0 / manuscript v16
+Model ID: GAM6_1b07bfc698a8b0186d551cf9bd45ce44
+Source: reconstructed ROSMAP brain benchmark, frozen October 18, 2026.
+Training: 40 donors; reference: 20 disjoint donors; gene panel: 2,000 genes.
+Types: astrocytes, excitatory neurons, inhibitory neurons, oligodendrocytes,
+oligodendrocyte precursor cells, immune cells, vascular cells.
+The original six-feature specification was chosen after earlier evaluation.
+The independent synthetic-cohort primary analysis then froze the scorer and rule.
+The package-compatible file is imported using import_variation_scorer().
+No fit coefficients were changed. The saved sentinel and predictions in all
+30 signal cohorts were replayed and matched to numerical tolerance 1e-10.
+The original object is also retained as brain_GAM6_v15.rds for exact provenance.
+Target: across-donor expression-recovery correlation, not association correctness.
+The score is not a probability and does not guarantee FDR control.
+Use load_variation_scorer() explicitly; no model is loaded automatically.
+Training bounds and panel checks identify extrapolation, not validated transfer.
+Do not presume transfer across tissues, gene panels, references or normalizations.
+Validate on suitable held-out data before using it in a new application.
+20% and 40% are study choices. Report retained counts, coverage and diagnostics.

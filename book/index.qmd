@@ -53,4 +53,4 @@ Continuous-phenotype associations and cell-type-specific eQTL candidates.
 
 The paper compares **standard BayesPrism**, **CDSeq2 (without gene-type prioritization)** and **CDSeq2 (with gene-type prioritization)**. The two CDSeq2 workflows share the same expression estimates. Prioritization adds a ranked subset for focused analysis and follow-up; it does not refit those estimates. BayesPrism uses its documented input preprocessing and no output ranking.
 
-This edition accompanies manuscript revision 14. The book includes all **6 main figures, 15 supplementary figures and 35 supplementary tables**, with scripts and source mappings. The tutorial is fully synthetic; its output is a teaching example, separate from the paper's benchmarks.
+This edition accompanies manuscript version 16. The book includes all **7 main figures, 18 supplementary figures and 42 supplementary tables**, with scripts and source mappings. The tutorial is fully synthetic; its output is a teaching example, separate from the paper's benchmarks.

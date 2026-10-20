@@ -1,69 +1,39 @@
-# Original brain-data benchmarks
+# Reconstructed brain benchmarks
 
-These experiments use donor-resolved single-nucleus components to construct bulk mixtures with known cellular contributions. They evaluate RNA fractions, individual expression recovery, continuous-phenotype associations and nominated-variant eQTLs.
+The current results use **39,533 reference nuclei**, 20 reference donors, 40 training donors and 40 evaluation donors, with 2,000 genes and seven cell types. Every primary experiment was rerun from the reconstructed numerical inputs; v16 adds diagnostics without changing those fits.
 
-## Required prepared inputs
-
-The direct aggregation design separates 20 reference donors, 40 training donors and 40 evaluation donors, on 2,000 genes and seven cell types. The reference includes 39,692 nuclei. The required objects are listed in `reproduction/brain/DATA_REQUIREMENTS.txt`, including their original checksums:
-
-| Input | Role |
-|---|---|
-| `rosmap_heldout_benchmark_minimal.rds` | Original donor-resolved benchmark material |
-| `rosmap_reference_sce.rds` | Annotated reference single-nucleus counts |
-| `TRANSFER_TO_MAC_FRESH_V1/inputs/new_donor_scaffold.rds` | Fresh-donor scaffold |
-| `TRANSFER_TO_MAC_FRESH_V1/FRESH_REQUEST/request.rds` | Frozen fresh-donor request |
-
-These are structured prepared objects, not arbitrary replacement matrices. The original study is described by [Mathys et al.](https://doi.org/10.1016/j.cell.2023.08.039). Download the nine processed Seurat objects and deidentified participant metadata from the [AD/Aging Brain Atlas](https://compbio.mit.edu/ad_aging_brain/).
-
-## Generate the prepared inputs
-
-The repository includes the original clustering and primary preparation engines, frozen donor and gene selections, and a wrapper in `reproduction/brain/preprocessing/`. Its [instructions](https://github.com/kkang7/CDSeq2/tree/main/reproduction/brain/preprocessing) list the required filenames, dependencies, resource needs and validation status.
-
-Run from the repository root, replacing the three paths with separate source, working and output directories:
+## Obtain and verify inputs
 
 ```bash
-Rscript reproduction/brain/preprocessing/run.R cluster /path/to/ROSMAP_AD /path/to/rosmap_work /path/to/rosmap_inputs
-Rscript reproduction/brain/preprocessing/run.R build /path/to/ROSMAP_AD /path/to/rosmap_work /path/to/rosmap_inputs
-Rscript reproduction/brain/00_preflight.R /path/to/rosmap_inputs/brain_config.R
+python3 reproduction/reproduce.py brain-prepare
 ```
 
-The source files total approximately 174 GiB and clustering needs substantial additional memory and disk space. Training/reference inputs use the original cluster filtering; evaluation inputs aggregate the original downloaded nuclei for the frozen evaluation donors. Generated objects are exported only if their numerical content matches the manuscript inputs. RDS serialization differences are allowed; changed counts or donor identities are rejected.
+This extracts the four verified input objects and their manifests into `work/ReconstructedData/`. The [download](../downloads/reconstructed_brain_inputs.zip) is also available directly. These objects generated the current paper; no historical clustering checkpoint is needed.
 
-**Validation scope:** the reconstructed object format passes the downstream reader when populated with archived numerical inputs, and mutation tests confirm rejection of altered inputs. The full download-to-clustering reconstruction has not been rerun. Source or clustering-version differences can cause the identity check to stop. This is not a claim of newly verified end-to-end raw-data reproduction.
-
-The successful build writes `brain_config.R`; use that path as the configuration argument in parts 01–07 below. Alternatively, configure paths to the original archived inputs as follows.
-
-## Configure paths once
-
-Edit `reproduction/brain/config.R` with the three input locations, a new output directory and the number of workers. The output directory must be separate from the inputs. Then run, from the repository root:
+The source study is [Mathys et al.](https://doi.org/10.1016/j.cell.2023.08.039). Download the nine processed Seurat objects from the [AD/Aging Brain Atlas](https://compbio.mit.edu/ad_aging_brain/). To independently reproduce and compare every training/evaluation aggregate and reference block from these source objects:
 
 ```bash
-Rscript reproduction/brain/00_preflight.R reproduction/brain/config.R
-Rscript reproduction/brain/01_prepare.R reproduction/brain/config.R
-Rscript reproduction/brain/02_deconvolution_and_gam7.R reproduction/brain/config.R
-Rscript reproduction/brain/03_gam6.R reproduction/brain/config.R
-Rscript reproduction/brain/04_continuous_phenotype.R reproduction/brain/config.R
-Rscript reproduction/brain/05_eqtl.R reproduction/brain/config.R
-Rscript reproduction/brain/06_standard_bayesprism.R reproduction/brain/config.R
-Rscript reproduction/brain/07_paper_outputs.R reproduction/brain/config.R
+Rscript work/ReconstructedData/verify_source_aggregation.R work/ReconstructedData /path/to/ROSMAP_AD
 ```
 
-The historical filename in part 02 is retained to preserve the audited engine and its original development sequence. Part 03 produces the six-feature model used in the paper; the current user API defaults to that six-feature model. Part 06 uses the original pooled-reference checks and CDSeq2 membership rule, then runs the **current standard BayesPrism** inference script. The superseded contribution-ranked BayesPrism analysis code is not included in this workflow.
+The verifier uses the new frozen nucleus selections, reads source objects one at a time and compares exact numerical content. The full source files occupy approximately 174 GiB and require substantial RAM. This verification was completed successfully for the reconstructed version. The downloaded input archive also allows native reruns without rereading those large source files.
 
-Part 07 rebuilds the brain-study tables and figures, including the 39-donor continuous sensitivity analysis. The independent-LD tables and figures are generated separately by the [independent benchmark](independent-eqtl.qmd). For part 07's schematic, set `CDSEQ2_FIGURE_PYTHON` to a Python executable with `reportlab` and `pypdfium2` installed.
+## Run the analyses
 
-The brain input reader also needs `SingleCellExperiment` and `SummarizedExperiment`, available through Bioconductor. Preflight checks these dependencies explicitly. Preserve the recorded engines and checksums; modified models or data should be treated as a new experiment with a new output directory.
+```bash
+python3 reproduction/reproduce.py brain-run
+```
 
-## Experiments and paper outputs
+The driver installs the archived inference source into a separate library, then runs preflight, direct inference, scorer development, continuous associations, nominated eQTL simulation, standard BayesPrism and paper-output preparation. The configuration is `work/ReconstructedData/config.R`; output is a new `rerun_results` folder within the extracted input directory. Parts are also independently callable as documented in its README. Use separate output directories for changed inputs or methods.
 
-| Experiment | What it establishes | Main underlying tables |
-|---|---|---|
-| Direct aggregation | RNA-fraction accuracy and gene–type profile recovery against known components | S1, S2, S11–S14 |
-| Prioritization | Recovery enrichment with explicit retained fractions and counts | S1, S2, S11, S23, S24 |
-| Continuous traits | Donor-level associations and agreement with observed-component associations | S3, S4, S9, S16, S17, S25 |
-| Nominated eQTLs | Recovery and attribution of injected effects across three signal ratios and three repetitions | S5–S8, S10, S15, S18–S22 |
+The 39-donor continuous-phenotype analysis retains the previous donor-index-3 sensitivity policy. Expression and eQTL benchmarks retain all original evaluation donors. The new null-stability audit identifies an additional influential profile pattern involving donor 38; this diagnostic does not remove another donor from primary analyses.
+
+## Historical reconstruction audit
+
+The historical clustering workflow in `reproduction/brain/preprocessing/` targets the earlier input version. Its October 18 audit reproduced evaluation counts, but training/reference selections differed. The paper was subsequently rerun using explicitly frozen, independently verified reconstructed selections. Historical signatures are retained for provenance and must not be used to certify the current input version. Current reproduction uses the `ReconstructedData` archive and its source verifier above.
 
 ## BayesPrism preprocessing
+
 
 The current comparison uses BayesPrism 2.2.3, pooled raw reference counts, one state per type and its `GEP` input interface. It applies `cleanup.genes()` with human groups `Rb`, `Mrp`, `other_Rb` and `chrM`, `exp.cells = 1`, followed by `new.prism()` with `outlier.cut = 0.01`, `outlier.fraction = 0.1` and `pseudo.min = 1e-8`. The chain length is 1,000, with 500 burn-in iterations and thinning of two; the full update is run.
 

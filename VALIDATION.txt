@@ -1,49 +1,41 @@
-CDSeq2 book and repository validation — 15 October 2026
+CDSeq2 manuscript v16 / package 0.1.0 validation — 20 October 2026
 
-Executed for this documentation release:
-- 65 package implementation, help and data files match the shared CDSeq2 source.
-  DESCRIPTION's minimum R version changed from 3.5 to 4.1.0 to match existing
-  native-pipe syntax. Original source folder and installed package unchanged.
-- A clean copy was compiled and installed into an isolated test library.
-- R CMD build succeeded; its source archive excludes the book, downloads,
-  reproduction code, work caches and tutorial outputs.
-- Complete synthetic tutorial executed with both the existing installation and
-  the newly installed copy. Both produced identical recovery summaries.
-- Tutorial checks: allocated reads conserve bulk counts; RNA fractions sum to
-  one; training and validation donors are distinct; 48/240 profiles retained per
-  type; saved scorer reloads and passes replay checks; phenotype/genotype tables
-  retain the full testing family and apply selection after BH adjustment.
-- All 21 figures (6 main, 15 supplementary) regenerated as PNG and PDF from
-  saved data. This does not rerun MCMC or the original study experiments.
-- Independent Python verification passed for 192 accuracy groups, 75,254
-  precision-recall rows, 192 fixed-threshold rows and 9,984 matched-FDP rows.
-- Independent expression-selection verification passed for 124,131 memberships,
-  63 ranking groups and 210 summary rows; 394 selected/scenario/type and
-  3,546/17,733 pooled per type. BayesPrism has no output selection.
-- All 35 numbered table files in the public archive retain their original bytes
-  and SHA-256 hashes from manuscript revision 14.
-- Quarto 1.7.32 rendered all 17 book pages successfully.
-- Browser inspection confirmed tutorial navigation, search results, collapsible
-  chapter navigation and rendered mathematical notation at the available
-  compact browser viewport.
-- Source asset checker passed table hashes, figure count and GitHub file sizes.
-- GitHub owner configuration was tested twice on a temporary copy; it is
-  repeatable and does not require or invent the author's GitHub username.
-- The curated standard-BayesPrism reference preparation exactly matches the
-  archived reference. All 16,002 current CDSeq2 top-40% memberships exactly
-  match the archived comparison rule, without a BayesPrism output ranking.
-- The independent benchmark's immutable computational-input guard passes.
+Completed local scientific checks:
+- Primary v15 numerical tables S1–S35 preserved; native inference unchanged.
+- New compact analysis inputs verified against source-fit checksums.
+- Imported brain scorer matches its saved sentinel and all 30 signal cohorts
+  to tolerance 1e-10; no fitted coefficients changed.
+- 210 primary selected sets match the additional equal-budget audit exactly.
+- 21,000 random subsets use the same 80/200 retention budget.
+- Independent Python verification checks counts, precision/recall, score groups,
+  primary null counts and donor sensitivity.
+- Bootstrap uncertainty resamples whole cohorts, not gene rows or random draws.
+- The null audit preserves primary results and documents donor/scale sensitivities.
+- Fresh execution of the downloadable diagnostics reproduces S36–S42 byte for byte.
+- The figure command rebuilds all 25 figures from the delivered data; primary
+  tables S1–S35 remain byte-identical to v15.
 
-Scope not newly executed:
-- The complete original brain-study pipeline was not rerun for this book; its
-  prepared study inputs are not included. Current standard-BayesPrism entry
-  points replace the superseded output-ranking comparison.
-- The 40-cohort independent native benchmark is a previously completed run;
-  its frozen assets, source snapshot, results and verification records are
-  included. It was not run a second time during book preparation.
-- GitHub Actions deployment has not been executed on GitHub; no repository was
-  created, push performed or website published. Configure the owner and enable
-  Pages (GitHub Actions source) in the user's repository before deployment.
+Completed local package checks:
+- CDSeq2 0.1.0 source built and installed into an isolated library on macOS arm64.
+- R CMD check --no-manual --no-build-vignettes: Status OK.
+- Synthetic tutorial rerun end to end with the installed release.
+- Tests cover alignment rejection, negative counts, deterministic ties, missing
+  scores, empty eligibility and unchanged p/q values under selection.
+- Tutorial checks count conservation, fraction sums, donor separation and replay.
+- Release scorer loading and unsupported-type behavior verified.
+- renv lock records 94 dependencies; all benchmark-table versions match.
 
-The rendered-link checker is run again after final assembly. See
-tools/check_book.py to repeat source, download, table-anchor and navigation checks.
+Release scope:
+- Book is synchronized with manuscript v16: 42 tables, 7 main and 18 supplementary
+  figures. All 18 chapters render. Local navigation, download targets, figure
+  files, table checksums and table anchors pass the automated book check.
+- New PDF pages and the rendered home/diagnostics pages were visually inspected.
+- Reproduction commands for table extraction, brain preparation, LD preparation,
+  figures and diagnostics were executed in fresh output folders. Brain preflight
+  passed using the extracted reconstructed inputs.
+- macOS checks above are complete. Linux/macOS GitHub Actions are configured but
+  have not executed for these unpushed changes.
+- A clean full dependency restoration on Linux is not claimed.
+- Native simulations were not rerun for v16; v15's completed runs are retained.
+- Source archive and release manifests are prepared locally. No new GitHub push,
+  GitHub release, Zenodo deposition or DOI assignment is claimed.

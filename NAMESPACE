@@ -56,3 +56,5 @@ importFrom(stats,
 )
 importFrom(utils,head)
 useDynLib(CDSeq2)
+
+export(summarize_variation_selection)

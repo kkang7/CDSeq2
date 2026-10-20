@@ -25,14 +25,15 @@ R >= 4.1 and a working package compilation toolchain are required. The commands 
 
 Read the [CDSeq2 Quarto book](https://kkang7.github.io/CDSeq2/) for tutorials, analysis workflows and manuscript reproduction instructions.
 
-## Reproduce the manuscript
+## Reproduce manuscript version 16
 
 ```bash
 python3 reproduction/reproduce.py tables
 python3 reproduction/reproduce.py independent-prepare
+python3 reproduction/reproduce.py brain-prepare
 ```
 
-See `book/chapters/reproduce.qmd` for commands to rebuild all 21 figures and run the native independent eQTL benchmark. Statistical figures use the 35 included CSV tables. Figure 1 also requires Python with reportlab and pypdfium2. The original brain-data analyses require downloaded ROSMAP data. See [the preprocessing workflow](reproduction/brain/preprocessing/README.md) to reconstruct the required inputs, including resource requirements and the limits of current validation.
+See `book/chapters/reproduce.qmd` for commands to rebuild all 25 figures and run the native independent eQTL benchmark. Statistical figures use the 42 included CSV tables. Figure 1 also requires Python with reportlab and pypdfium2. Verified reconstructed inputs and the source-verification workflow are included in the book downloads. Native reruns and the additional prioritization/null diagnostics are separate commands documented in the book.
 
 The comparison is standard BayesPrism versus CDSeq2 without and with gene-type prioritization. Prioritization selects profiles from the same CDSeq2 fit; it does not change expression or association p values. Report accuracy and coverage together.
 

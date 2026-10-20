@@ -1,11 +1,32 @@
-Validation on 2026-10-15
+Full ROSMAP source-data replay, 18 October 2026
 
-PASS: all preprocessing R sources parse.
-PASS: original archived numerical identities.
-PASS: minimal reserialization accepted by actual downstream .da_inputs reader.
-PASS: downstream dimensions 2000 genes, 7 types, 40 training, 40 evaluation, 39692 reference nuclei.
-PASS: changed count and donor rejected on archived data.
-PASS: synthetic contract test rejects changed count, donor, fit and reference.
-PASS: all 17 Quarto pages rendered; local links, downloads, figures and tables checked.
+RESULT: partial numerical reproduction; exact manuscript-input verification FAILED.
+All nine source RDS files match the historical MD5 identities (approximately 174 GiB).
+All nine components completed clustering, and all four candidate inputs were assembled.
+The balanced starting pool contains the same 200 donors as the archived benchmark.
+Gene/type axes, training/reference/evaluation donors and fit settings match.
+All 560,000 evaluation expression-count values and 280 evaluation nucleus counts match exactly.
+Training differs in 132,289 of 560,000 expression-count values and 164 of 280 nucleus counts.
+Reference: 39,533 reconstructed versus 39,692 archived nuclei; 29,108 shared nuclei.
+All 58,216,000 count values for shared reference nuclei match exactly.
+The pooled reference differs in 11,929 of 14,000 values.
+The scaffold and request signatures fail because they also include reference-derived quantities; this does not indicate a mismatch in evaluation expression counts or fit settings.
+No verified input set was exported. Candidate objects were kept separately for diagnostics.
+The original manuscript inference results, figures and numerical tables were not replaced.
 
-NOT EXECUTED: complete 174-GiB source-file rehash, clustering and newly aggregated input reconstruction. No new inference or figures generated.
+Environment: R 4.6.1; Seurat 5.5.1; SeuratObject 5.4.0; Harmony 2.0.5;
+Matrix 1.7-6; macOS Tahoe 26.7.1, Apple arm64, 128 GiB installed RAM.
+See the two sessionInfo files for complete package and numerical-library identities.
+Sequential component execution retained the original clustering settings and seeds.
+Legacy Seurat objects required UpdateSeuratObject; raw counts and cell metadata were checked for exact preservation around each update.
+Unused analysis caches were removed before primary assembly; raw counts and metadata were checked for exact preservation.
+
+Interpretation: the unresolved difference lies in training/reference cell selection.
+Source-file identity and the original donor pool are verified. Dependency-version effects
+on clustering are a plausible explanation, not a demonstrated causal diagnosis.
+The available historical environment record does not completely specify the clustering stage.
+Exact reconstruction needs the original cell-selection/checkpoint provenance or a validated
+matching environment. Do not change expected_content.csv to accept the new candidates.
+Archived-input downstream reproduction and source-data reconstruction are separate claims.
+
+Additional validation: contract test accepts valid inputs and rejects changed count, donor, fit and reference.

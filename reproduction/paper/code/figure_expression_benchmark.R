@@ -45,5 +45,6 @@ fig('Figure_S4_ground_truth_comparison',10,8.4,function(){
   q<-quantile(v,c(.25,.5,.75));segments(x,q[1],x,q[3],lwd=2.3,col='#333333');points(x,q[2],pch=21,bg='white',cex=.65)
  }
  lx<-c(.62,2.7,5);points(lx,rep(-.85,3),pch=22,bg=palette,cex=.8);text(lx+.12,rep(-.85,3),c('BayesPrism\n100%','CDSeq2 (without gene-type\nprioritization); 100%','CDSeq2 (with gene-type\nprioritization); 20.0%'),adj=c(0,.5),cex=.72)
- mtext('Retained per type across 9 scenarios (same workflow order): 17,733; 17,733; 3,546',1,line=3.7,cex=.73)
+ counts<-read('S24_S6_recovery_counts.csv'); cc<-subset(counts,scenario=='ALL'&cell_type=='Excit'); nn<-cc$n_retained[match(c('BayesPrism','CDSeq2','CDSeq2+GAM6'),cc$workflow)]
+ mtext(paste('Retained per type across 9 scenarios (same workflow order):',paste(format(nn,big.mark=',',trim=TRUE),collapse='; ')),1,line=3.7,cex=.73)
 })

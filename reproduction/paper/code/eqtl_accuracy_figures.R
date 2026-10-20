@@ -10,10 +10,12 @@ pr<-function(h,r=0){plot(NA,xlim=c(0,100),ylim=c(0,103),xaxs='i',yaxs='i',xlab='
  for(j in seq_along(wf)){z<-subset(cur,cell_type=='Excit'&replicate==r&signal_ratio==h&workflow==wf[j]&calls>0);z<-z[order(z$q_threshold),];lines(z$recall*100,z$precision*100,col=cols[j],lty=ltys[j],lwd=1.6);q<-subset(fixed,cell_type=='Excit'&replicate==r&signal_ratio==h&workflow==wf[j]);points(q$recall*100,q$precision*100,pch=21,bg=cols[j],col='white',cex=1.2,lwd=1)}
  if(r==0)mtext('Circles: original q <= 0.05 threshold',3,line=.05,cex=.72,col='#555555')else mtext(paste('Repetition',r,'| circles: q <= 0.05'),3,line=.05,cex=.7,col='#555555')
 }
+cap_values <- subset(matched,cell_type=='Excit' & replicate==0 & signal_ratio%in%c(.5,.8) & FDP_cap%in%c(.05,.1,.2))$recall*100
+cap_upper <- max(10,ceiling((max(cap_values,na.rm=TRUE)+5)/10)*10)
 fig('Figure_5_precision_recall_F1_matched_FDP',11,10.6,function(){par(mfrow=c(3,2),mar=c(4.2,4.4,3,1.0),oma=c(5.7,0,0,0),mgp=c(2.65,.8,0),las=1,cex=1.0)
  for(h in c(.5,.8)){pr(h);lab(if(h==.5)'A'else'B')}
  for(h in c(.5,.8)){z<-subset(fixed,cell_type=='Excit'&replicate==0&signal_ratio==h);z<-z[match(wf,z$workflow),];xx<-barplot(z$F1,col=cols,border=NA,ylim=c(0,.8),names.arg=rep('',3),ylab='F1 score',main=paste('F1 at q <= 0.05 | ratio',h),cex.main=.96,cex.names=.63);axis(1,at=xx,labels=c('BayesPrism','CDSeq2\n(without gene-type\nprioritization)','CDSeq2\n(with gene-type\nprioritization)'),tick=FALSE,line=1.1,cex.axis=.63);text(xx,z$F1+.035,sprintf('%.3f',z$F1),cex=.86);lab(if(h==.5)'C'else'D')}
- for(h in c(.5,.8)){m<-sapply(c(.05,.1,.2),function(cap){z<-subset(matched,cell_type=='Excit'&replicate==0&signal_ratio==h&abs(FDP_cap-cap)<1e-10);z$recall[match(wf,z$workflow)]*100});xx<-barplot(m,beside=TRUE,col=cols,border=NA,names.arg=c('5%','10%','20%'),ylim=c(0,32),ylab='Full-target recall (%)',xlab='Common empirical directional FDP cap',main=paste('Recall under FDP caps | ratio',h),cex.main=.96);text(xx,m+1,sprintf('%.1f',m),cex=.69);lab(if(h==.5)'E'else'F')}
+ for(h in c(.5,.8)){m<-sapply(c(.05,.1,.2),function(cap){z<-subset(matched,cell_type=='Excit'&replicate==0&signal_ratio==h&abs(FDP_cap-cap)<1e-10);z$recall[match(wf,z$workflow)]*100});xx<-barplot(m,beside=TRUE,col=cols,border=NA,names.arg=c('5%','10%','20%'),ylim=c(0,cap_upper),ylab='Full-target recall (%)',xlab='Common empirical directional FDP cap',main=paste('Recall under FDP caps | ratio',h),cex.main=.96);text(xx,m+1,sprintf('%.1f',m),cex=.69);lab(if(h==.5)'E'else'F')}
  sharedlegend()
 })
 fig('Figure_S9_all_type_precision_recall_F1',11,11.4,function(){par(mfrow=c(3,2),mar=c(8.0,4.4,2.8,1),oma=c(5.7,0,0,0),mgp=c(2.65,.8,0),las=1,cex=.95);cts<-c('Astro','Excit','Inhib','Oligo','OPC','Immune','Vascular');i<-0

@@ -34,6 +34,7 @@ book:
         - chapters/reproduce.qmd
         - chapters/independent-eqtl.qmd
         - chapters/brain-benchmarks.qmd
+        - chapters/diagnostics.qmd
         - chapters/figures.qmd
         - chapters/supplementary.qmd
         - chapters/data.qmd

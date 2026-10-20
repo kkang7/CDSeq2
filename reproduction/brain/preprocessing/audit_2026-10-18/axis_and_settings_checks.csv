@@ -1,0 +1,9 @@
+"check","pass"
+"training_genes",TRUE
+"training_types",TRUE
+"training_donors",TRUE
+"reference_donors",TRUE
+"evaluation_axes",TRUE
+"evaluation_donors",TRUE
+"fit_settings",TRUE
+"reference_genes",TRUE

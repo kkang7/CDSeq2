@@ -23,6 +23,11 @@ if(work==data_dir || out==data_dir || work==out) stop('Use distinct data, work a
 options(rosmap.step1.run_on_source=FALSE,rosmap.step2.primary.run_on_source=FALSE,
         rosmap.primary.run_on_source=FALSE)
 source(file.path(here,'original/rosmap_step1_cluster_once.R'))
+source(file.path(here,'read_source.R'))
+# Only the reader changes; original subsetting and clustering functions are retained.
+body(load_and_subset_step1_component) <- parse(text=gsub(
+  'readRDS(cfg$input_files[[component]])', 'read_rosmap_source(cfg$input_files[[component]])',
+  paste(deparse(body(load_and_subset_step1_component)),collapse='\n'),fixed=TRUE))[[1]]
 cfg1 <- rosmap_step1_config()
 cfg1$input_files <- setNames(file.path(data_dir,basename(cfg1$input_files)),names(cfg1$input_files))
 cfg1$output_dir <- file.path(work,'clustered_once_balanced_200')
@@ -30,12 +35,14 @@ cfg1$output_files <- setNames(file.path(cfg1$output_dir,basename(cfg1$output_fil
 cfg1$metadata_file <- file.path(data_dir,'individual_metadata_deidentified.tsv')
 cfg1$workers <- 1L # Bound memory: each source object can occupy tens of GB.
 if(args[1]=='cluster') {
-  run_rosmap_step1_cluster_once(cfg1)
+  source(file.path(here,'stream_cluster.R'))
+  run_rosmap_step1_stream(cfg1)
   quit(save='no')
 }
 if(dir.exists(out) && length(list.files(out,all.files=TRUE,no..=TRUE)))
   stop('OUTPUT_DIR must be empty; existing results are never overwritten.')
 source(file.path(here,'original/rosmap_step2_primary.R'))
+source(file.path(here,'slim_primary.R'))
 cfg <- rosmap_step2_primary_config()
 cfg$input_files <- cfg1$output_files
 cfg$step1_checkpoint_dir <- cfg1$output_dir
@@ -75,7 +82,7 @@ pooled <- sapply(types,function(k)as.numeric(Matrix::rowSums(rc[,rmd$cellType==k
 dimnames(pooled)<-list(genes,types)
 rm(pr,sampled,rc,rmd,byct,a);gc()
 # Evaluation cohort uses ALL source nuclei for the frozen donors, without the
-# training cohort's largest-cluster restriction. Do not substitute clustered files.
+# training cohort's donor-shared-cluster restriction. Do not substitute clustered files.
 canon <- function(x) {
   x<-toupper(trimws(as.character(x)));ok<-!is.na(x)&grepl('^(ROSMAP[-_]?)?[0-9]+$',x)
   z<-sub('^ROSMAP[-_]?','',x[ok]);z<-sub('^0+(?=.)','',z,perl=TRUE)
@@ -85,7 +92,7 @@ vcounts<-array(0,c(length(genes),length(types),nrow(eval)),list(genes,types,eval
 ncells<-matrix(0,length(types),nrow(eval),dimnames=list(types,eval$sample))
 for(component in names(cfg1$input_files)) {
   message('Aggregating evaluation nuclei: ',component)
-  obj<-readRDS(cfg1$input_files[[component]])
+  obj<-read_rosmap_source(cfg1$input_files[[component]])
   metadata<-obj[[]]; counts<-extract_count_matrix(obj,'RNA')
   stopifnot(identical(rownames(metadata),colnames(counts)),all(genes%in%rownames(counts)))
   donor<-canon(metadata$subject);k<-match(cfg1$component_to_major[[component]],types)
@@ -99,6 +106,16 @@ v<-list(counts=vcounts,metadata=data.frame(sample=eval$sample,donor=eval$donor),
         n_cells=ncells,pooled_reference=pooled,reference_donors=refs)
 req<-list(reference_mean=sweep(pooled,2,colSums(pooled),'/'),reference_donors=refs,
           fit=dget(file.path(here,'fit.R')))
+# Preserve candidate objects for diagnostics even if identity verification fails.
+# These are NOT labelled or exported as verified manuscript inputs.
+candidates<-file.path(work,'candidate_inputs');dir.create(candidates,recursive=TRUE,showWarnings=FALSE)
+for(nm in c('b','sce','v','req'))saveRDS(get(nm),file.path(candidates,paste0(nm,'.rds')),version=2)
+capture.output(sessionInfo(),file=file.path(work,'build_sessionInfo.txt'))
+observed<-rosmap_signatures(b,sce,v,req)
+expected<-read.csv(file.path(here,'expected_content.csv'),stringsAsFactors=FALSE)
+write.csv(data.frame(input=names(observed),expected=expected$sha256[match(names(observed),expected$input)],
+ observed=unname(observed),match=unname(observed)==expected$sha256[match(names(observed),expected$input)]),
+ file.path(work,'numerical_comparison.csv'),row.names=FALSE)
 # Fail closed if source revisions or clustering changes alter the paper inputs.
 rosmap_verify_objects(b,sce,v,req,file.path(here,'expected_content.csv'))
 dir.create(file.path(out,'TRANSFER_TO_MAC_FRESH_V1/inputs'),recursive=TRUE)
