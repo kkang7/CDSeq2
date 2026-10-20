@@ -25,17 +25,16 @@ Completed local package checks:
 - Release scorer loading and unsupported-type behavior verified.
 - renv lock records 94 dependencies; all benchmark-table versions match.
 
-Release scope:
-- Book is synchronized with manuscript v16: 42 tables, 7 main and 18 supplementary
-  figures. All 18 chapters render. Local navigation, download targets, figure
-  files, table checksums and table anchors pass the automated book check.
-- New PDF pages and the rendered home/diagnostics pages were visually inspected.
-- Reproduction commands for table extraction, brain preparation, LD preparation,
-  figures and diagnostics were executed in fresh output folders. Brain preflight
-  passed using the extracted reconstructed inputs.
-- macOS checks above are complete. Linux/macOS GitHub Actions are configured but
-  have not executed for these unpushed changes.
-- A clean full dependency restoration on Linux is not claimed.
+Release scope and publication:
+- The book contains 42 tables, 7 main and 18 supplementary figures; all 18
+  chapters render and pass local/remote navigation and download checks.
+- GitHub Actions package checks, the complete synthetic tutorial and frozen
+  scorer checks passed on both Linux and macOS for release commit 1fa8e88.
+- An initial workflow quoting error was corrected before release publication.
+- The published site's PDFs and data manifests matched the local release files.
+- A clean full dependency restoration and native benchmark rerun on Linux are
+  not claimed; CI checks the package and tutorial, not the full benchmark.
 - Native simulations were not rerun for v16; v15's completed runs are retained.
-- Source archive and release manifests are prepared locally. No new GitHub push,
-  GitHub release, Zenodo deposition or DOI assignment is claimed.
+Release: https://github.com/kkang7/CDSeq2/releases/tag/v0.1.0
+Archive: https://doi.org/10.5281/zenodo.23489824
+Remote validation: https://github.com/kkang7/CDSeq2/actions/runs/39370467686

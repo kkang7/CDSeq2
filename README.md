@@ -1,5 +1,7 @@
 # CDSeq2
 
+Archived software: [CDSeq2 0.1.0 (10.5281/zenodo.23489824)](https://doi.org/10.5281/zenodo.23489824).
+
 Reference-based individual-level cell-type expression inference with optional gene-type prioritization.
 
 This repository contains the R package, a Quarto book and reproduction workflows for the accompanying manuscript. The book covers installation, a complete synthetic tutorial, analysis of new data, scorer training and validation, phenotype/eQTL applications, all manuscript figures and underlying tables.

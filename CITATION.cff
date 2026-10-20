@@ -3,6 +3,8 @@ message: "Please cite this software release and the accompanying CDSeq2 manuscri
 type: software
 title: "CDSeq2: individual-level cell-type expression with gene-type prioritization"
 version: 0.1.0
+date-released: 2026-10-20
+doi: 10.5281/zenodo.23489824
 authors:
   - family-names: Kang
     given-names: Kai

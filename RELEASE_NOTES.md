@@ -1,6 +1,6 @@
 # CDSeq2 0.1.0 — manuscript version 16
 
-This prepared release synchronizes the package, Quarto book, 42 supplementary
+This release synchronizes the package, Quarto book, 42 supplementary
 tables, 25 figures, reconstructed brain inputs and independent LD benchmark.
 It adds a directly loadable frozen brain scorer with a model description,
 `summarize_variation_selection()`, package tests, Linux/macOS CI, citation

@@ -2,4 +2,5 @@ CDSeq2 0.1.0 / manuscript v16
 
 Read README.md for install_github installation and the Quarto book link.
 Use reproduction/reproduce.py --help for separate figure, diagnostic and native runs.
-See VALIDATION.txt for completed local checks; the GitHub site updates after a push.
+See VALIDATION.txt for local and passed Linux/macOS CI checks.
+Archived release: https://doi.org/10.5281/zenodo.23489824

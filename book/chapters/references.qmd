@@ -27,3 +27,9 @@ Methods differ in their target outputs. Many focus on cell composition; a smalle
 ## Documentation and assistance
 
 The website is a [Quarto book](https://quarto.org/docs/books/), with deployment through [GitHub Pages custom workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages). Documentation text, example scripts and figure-presentation code were prepared with OpenAI Codex assistance. Scientific claims refer to the included data and cited methods; authors retain responsibility for review and the final release.
+
+## Archived software release
+
+Kai Kang and Kaiyu Xie. CDSeq2 0.1.0: individual-level cell-type expression with gene-type prioritization. Zenodo. [10.5281/zenodo.23489824](https://doi.org/10.5281/zenodo.23489824).
+
+[GitHub release](https://github.com/kkang7/CDSeq2/releases/tag/v0.1.0) · [Linux and macOS package validation](https://github.com/kkang7/CDSeq2/actions/runs/39370467686). The archive preserves the tagged software and bundled reproduction materials; current documentation may include later citation and publication-status updates.
