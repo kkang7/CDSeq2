@@ -18,3 +18,11 @@ The trained scorer object.
 \description{
 Load a user-trained variation scorer
 }
+\examples{
+data(cdseq2_toy)
+x <- cdseq2_toy
+f <- tempfile(fileext = ".rds")
+save_variation_scorer(x$scorer, f)
+model <- load_variation_scorer(f)
+unlink(f)
+}

@@ -1,0 +1,12 @@
+Changes in version 0.99.0
+
+* Prepare CDSeq2 for Bioconductor review.
+* Add an executable synthetic-data vignette.
+* Preserve the archived 0.1.0 release and inference algorithms.
+* Restore caller RNG state after explicitly seeded operations using withr.
+* Split frozen DEG model storage; preserve predictions and explicit-path loading.
+* Add synthetic help-page examples, inference invariants and model replay tests.
+* Set the Bioconductor development R requirement to 4.6.0.
+* Use the standard R package citation until the manuscript DOI is confirmed.
+* Fix benchmark gene filtering for limma/DESeq2 column names and type-specific
+  labels of shared DEGs; support single-cell-type label summaries.

@@ -26,6 +26,7 @@ export(score_deg)
 export(score_variation)
 export(select_variation_profiles)
 export(simulate_variation_mixtures)
+export(summarize_variation_selection)
 export(train_variation_scorer)
 export(train_variation_scorer_from_features)
 export(validate_variation_scorer)
@@ -56,5 +57,3 @@ importFrom(stats,
 )
 importFrom(utils,head)
 useDynLib(CDSeq2)
-
-export(summarize_variation_selection)

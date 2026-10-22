@@ -85,22 +85,19 @@
 #'   `ctsGEP_normalized_sd`, `rna_proportions`,
 #'   `selected_reference_precision`, and `precision_diagnostics`.
 #'
-#' @examples
-#' \dontrun{
-#' fit3 <- cdseq3(
-#'   bulk_data = bulk_data,
-#'   reference_scRNA_count = reference_count,
-#'   reference_scRNA_annotation = reference_annotation,
-#'   reference_precision = 1e6,
-#'   precision_strategy = "fixed",
-#'   mcmc_iterations = 1000,
-#'   save_last_n_mc = 500,
-#'   cpu_number = 6
-#' )
-#' normalized_ctsGEP <- fit3$ctsGEP_normalized
-#' }
-#'
 #' @export
+#' @examples
+#' set.seed(1)
+#' ref <- matrix(rpois(120, 5), 20, 6,
+#'     dimnames = list(paste0("g", seq_len(20)), paste0("c", seq_len(6))))
+#' bulk <- ref[, 1:2] + ref[, 4:5]
+#' colnames(bulk) <- c("s1", "s2")
+#' fit <- cdseq3(bulk, reference_scRNA_count = ref,
+#'     reference_scRNA_annotation = rep(c("A", "B"), each = 3),
+#'     reference_aggregation = "pooled_counts", reference_precision = 100,
+#'     mcmc_iterations = 12, save_last_n_mc = 6, cpu_number = 1,
+#'     seed = 1L, verbose = FALSE)
+#' names(fit)
 cdseq3 <- function(
     bulk_data,
     mcmc_iterations = 700,

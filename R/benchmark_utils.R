@@ -50,20 +50,16 @@
 #' These steps should be performed downstream depending on the
 #' differential expression framework used.
 #'
-#' @examples
-#' \dontrun{
-#' pb_array <- create_ct_pseudobulk(
-#'   counts     = sc_counts,
-#'   cell_type  = sc_meta$cell_type,
-#'   patient_id = sc_meta$patient_id
-#' )
-#'
-#' # Extract pseudo-bulk matrix for a single cell type
-#' ctA_mat <- pb_array[, "A", ]
-#' }
-#'
 #' @importFrom Matrix rowSums
 #' @export
+#' @examples
+#' data(cdseq2_toy)
+#' x <- cdseq2_toy
+#' counts <- x$data$reference
+#' ct <- x$data$annotation
+#' donors <- x$data$reference_donors
+#' pb <- create_ct_pseudobulk(counts, ct, donors)
+#' dim(pb)
 create_ct_pseudobulk <- function(
     counts,
     cell_type,
@@ -134,10 +130,9 @@ create_ct_pseudobulk <- function(
 #'   patient or subject identifier for each cell. This defines the
 #'   pseudo-bulk aggregation unit.
 #'
-#' @param condition A named character or factor vector specifying the condition
-#'   for each patient. The names must correspond to unique values of
-#'   \code{patient_id}. In paired designs, the condition must vary within
-#'   patients.
+#' @param condition A character or factor vector of length ncol(counts),
+#'   giving the condition of each cell in column order. In paired designs,
+#'   each patient contributes cells from both conditions.
 #'
 #' @param min_cells Integer. Minimum number of cells required for a given
 #'   cell type within a patient for that patient to be included in DE
@@ -186,37 +181,21 @@ create_ct_pseudobulk <- function(
 #' is not full rank or for which insufficient patient-level replication is
 #' available.
 #'
-#' @examples
-#' \dontrun{
-#' ## Unpaired DE
-#' ct_deg_unpaired <- call_ct_DEGs_pb(
-#'   counts     = pb_sc_data$counts,
-#'   cell_type  = pb_sc_data$cell_type_major,
-#'   patient_id = pb_sc_data$sample_id,
-#'   condition  = cond_sample,
-#'   paired     = FALSE
-#' )
-#'
-#' ## Paired DE (recommended for Kang IFN-beta)
-#' cond_sample <- with(pb_sc_data,
-#'   tapply(condition, donor_id, unique)
-#' )
-#'
-#' ct_deg_paired <- call_ct_DEGs_pb(
-#'   counts     = pb_sc_data$counts,
-#'   cell_type  = pb_sc_data$cell_type_major,
-#'   patient_id = pb_sc_data$donor_id,
-#'   condition  = cond_sample,
-#'   paired     = TRUE
-#' )
-#' }
-#'
-#'
-#'
 #' @importFrom Matrix rowSums
 #' @importFrom limma voom lmFit eBayes topTable makeContrasts contrasts.fit
 #' @importFrom stats model.matrix
 #' @export
+#' @examples
+#' data(cdseq2_toy)
+#' x <- cdseq2_toy
+#' counts <- x$data$reference
+#' ct <- x$data$annotation
+#' donors <- x$data$reference_donors
+#' condition <- setNames(rep(c("control", "treated"), each = 3),
+#'     sort(unique(donors)))
+#' result <- call_ct_DEGs_pb(counts, ct, donors,
+#'     unname(condition[donors]), min_cells = 1, paired = FALSE)
+#' names(result)
 call_ct_DEGs_pb <- function(
     counts,
     cell_type,
@@ -475,25 +454,21 @@ call_ct_DEGs_pb <- function(
 #' (e.g. via \code{call_ct_DEGs_pb}) and before synthetic data generation
 #' or benchmarking evaluation.
 #'
-#' @examples
-#' \dontrun{
-#' bench_genes <- filter_genes_benchmark(
-#'   ct_deg_list       = ct_deg,
-#'   target_cell_types = c("B", "CD4T", "CD8T"),
-#'   n_deg_per_ct      = 25,
-#'   n_shared_deg      = 0,
-#'   n_non_deg         = 100,
-#'   deg_pval_cutoff   = 0.01,
-#'   deg_logfc_cutoff  = 0.5,
-#'   seed              = 1
-#' )
-#' }
-#'
 #' @seealso
 #' \code{\link{call_ct_DEGs_pb}}
 #'
 #' @export
 
+#' @examples
+#' genes <- paste0("g", seq_len(20))
+#' a <- data.frame(gene = genes, log2FoldChange = c(rep(1, 5), rep(0, 15)),
+#'     adj.P.Val = c(rep(0.001, 5), rep(0.9, 15)))
+#' b <- a
+#' b$log2FoldChange <- rev(a$log2FoldChange)
+#' b$adj.P.Val <- rev(a$adj.P.Val)
+#' selected <- filter_genes_benchmark(list(A = a, B = b), c("A", "B"),
+#'     n_deg_per_ct = 2, n_non_deg = 3, seed = 1)
+#' selected$genes
 filter_genes_benchmark <- function(
     ct_deg_list,
     target_cell_types,
@@ -506,7 +481,7 @@ filter_genes_benchmark <- function(
     seed = NULL
 ) {
 
-  if (!is.null(seed)) set.seed(seed)
+  if (!is.null(seed)) withr::local_seed(seed)
 
   stopifnot(all(target_cell_types %in% names(ct_deg_list)))
 
@@ -522,17 +497,21 @@ filter_genes_benchmark <- function(
   }
 
   ## ---- build DEG indicator matrix ----
-  deg_mat <- sapply(target_cell_types, function(ct) {
+  # Assisted-by: OpenAI Codex. Accept the documented limma column names
+  # as well as legacy DESeq2-style tables; missing values are not discoveries.
+  stopifnot(length(target_cell_types) > 0L, length(all_genes) > 0L)
+  deg_mat <- vapply(target_cell_types, function(ct) {
     df <- ct_deg_list[[ct]]
-
-    deg_genes <- with(
-      df,
-      gene[padj < deg_pval_cutoff &
-             abs(log2FoldChange) >= deg_logfc_cutoff]
-    )
-
-    all_genes %in% deg_genes
-  })
+    p_col <- if ("padj" %in% names(df)) "padj" else "adj.P.Val"
+    fc_col <- if ("log2FoldChange" %in% names(df)) "log2FoldChange" else "logFC"
+    if (!all(c("gene", p_col, fc_col) %in% names(df)))
+      stop("Each DEG table needs gene, adjusted p-value and log-fold-change columns.")
+    keep <- is.finite(df[[p_col]]) & is.finite(df[[fc_col]]) &
+      df[[p_col]] < deg_pval_cutoff & abs(df[[fc_col]]) >= deg_logfc_cutoff
+    all_genes %in% df$gene[keep]
+  }, logical(length(all_genes)))
+  deg_mat <- matrix(deg_mat, nrow = length(all_genes),
+    dimnames = list(all_genes, target_cell_types))
 
   rownames(deg_mat) <- all_genes
   deg_count <- rowSums(deg_mat)
@@ -578,15 +557,14 @@ filter_genes_benchmark <- function(
 
   for (ct in target_cell_types) {
     label_df[[paste0("DE_", ct)]] <-
-      label_df$gene %in% ct_specific[[ct]] |
-      label_df$gene %in% shared_deg
+      deg_mat[match(label_df$gene, all_genes), ct]
   }
 
   label_df$DE_class <- ifelse(
-    rowSums(label_df[ , grepl("^DE_", names(label_df))]) == 0,
+    rowSums(label_df[ , grepl("^DE_", names(label_df)), drop = FALSE]) == 0,
     "non-DEG",
     ifelse(
-      rowSums(label_df[ , grepl("^DE_", names(label_df))]) == 1,
+      rowSums(label_df[ , grepl("^DE_", names(label_df)), drop = FALSE]) == 1,
       "cell-type-specific DEG",
       "shared DEG"
     )
@@ -661,19 +639,19 @@ filter_genes_benchmark <- function(
 #' @param sample_id A character or factor vector of length \code{ncol(counts)}
 #'   indicating the sample / patient / individual ID for each cell.
 #'
-#' @param min_cells_per_ct Integer ≥ 1.
+#' @param min_cells_per_ct Integer at least 1.
 #'   Minimum number of cells required for a cell type to be considered present
 #'   within a sample.
 #'
-#' @param min_samples_per_ct Integer ≥ 1.
+#' @param min_samples_per_ct Integer at least 1.
 #'   Minimum number of samples in which a cell type must meet
 #'   \code{min_cells_per_ct} to be retained globally.
 #'
-#' @param min_gene_total Integer ≥ 0.
+#' @param min_gene_total Integer at least 0.
 #'   Minimum total read count across all retained cells required for a gene
 #'   to be kept.
 #'
-#' @param min_cells_per_gene Integer ≥ 1.
+#' @param min_cells_per_gene Integer at least 1.
 #'   Minimum number of cells in which a gene must be expressed (nonzero)
 #'   to be retained.
 #'
@@ -706,26 +684,20 @@ filter_genes_benchmark <- function(
 #'   \item Spatial transcriptomics simulations
 #' }
 #'
-#' @examples
-#' \dontrun{
-#' res <- filter_sc_counts(
-#'   counts = sc_counts,
-#'   cell_type = sc_celltype,
-#'   sample_id = sc_patient,
-#'   min_cells_per_ct = 5,
-#'   min_samples_per_ct = 3,
-#'   min_gene_total = 20,
-#'   min_cells_per_gene = 3
-#' )
-#'
-#' counts_filt <- res$counts
-#' }
-#'
-#'
 #' @author Kai Kang
 #'
 #' @export
 
+#' @examples
+#' data(cdseq2_toy)
+#' x <- cdseq2_toy
+#' counts <- x$data$reference
+#' ct <- x$data$annotation
+#' donors <- x$data$reference_donors
+#' filtered <- filter_sc_counts(counts, ct, donors,
+#'     min_cells_per_ct = 1, min_samples_per_ct = 1,
+#'     min_gene_total = 1, min_cells_per_gene = 1)
+#' dim(filtered$counts)
 filter_sc_counts <- function(
     counts,
     cell_type,
@@ -865,6 +837,19 @@ filter_sc_counts <- function(
 #' @importFrom methods as
 #' @importFrom stats complete.cases setNames
 #' @export
+#' @examples
+#' data(cdseq2_toy)
+#' x <- cdseq2_toy
+#' counts <- x$data$reference
+#' ct <- x$data$annotation
+#' donors <- x$data$reference_donors
+#' meta <- data.frame(cell_id = colnames(counts), celltype = ct,
+#'     sampleID = donors)
+#' # A shared input here illustrates formatting only, not independent validation.
+#' b <- generate_benchmark_dataset(counts, meta, counts, meta,
+#'     min_cells_per_ct = 1, min_samples_per_ct = 1,
+#'     min_cells_per_gene = 1, min_gene_total = 1, verbose = FALSE)
+#' names(b)
 generate_benchmark_dataset <- function(
     pb_sc_counts,
     pb_sc_meta,

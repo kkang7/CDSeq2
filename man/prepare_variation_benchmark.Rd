@@ -52,3 +52,13 @@ between estimated and known within-type normalized profiles. The known
 components must come from a simulation or independent measurement, never
 from treating the CDSeq2 estimate itself as truth.
 }
+\examples{
+data(cdseq2_toy)
+x <- cdseq2_toy
+benchmark <- prepare_variation_benchmark(
+    x$data$training$bulk, x$data$reference_mean,
+    x$training_fractions, x$training_counts, x$data$training$truth,
+    x$data$training$donor_ids, unique(x$data$reference_donors), "training",
+    oracle = "direct_observed_component_counts")
+names(benchmark)
+}

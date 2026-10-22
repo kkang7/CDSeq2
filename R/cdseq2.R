@@ -1243,7 +1243,7 @@
 #'
 #' @param rng A scalar equal to `1` or `2`, selecting the random-number generator
 #'   used by `gibbsSampler`: `1` for Mersenne Twister and `2` for
-#'   Xoshiro256plus. `set.seed()` is applied before each chain when `seed` is not
+#'   Xoshiro256plus. `withr::local_seed()` is applied before each chain when `seed` is not
 #'   `NULL`; exact reproducibility for `rng = 2` also depends on how the compiled
 #'   Xoshiro implementation is seeded.
 #'
@@ -1369,58 +1369,24 @@
 #'   total elapsed time in hours.}
 #' }
 #'
-#' @examples
-#' \dontrun{
-#' fit <- cdseq2(
-#'   bulk_data = bulk_counts,
-#'   reference_scRNA_count = reference_counts,
-#'   reference_scRNA_annotation = reference_cell_type,
-#'   reference_precision = 1e6,
-#'   mcmc_iterations = 1000,
-#'   save_last_n_mc = 500,
-#'   n_chains = 3,
-#'   seed = 123,
-#'   primary_gep_estimator = "rao_blackwell"
-#' )
-#'
-#' # Recommended normalized ctsGEP for the first sample:
-#' phi_hat <- fit$cdseq_result[[1]]$estGEP_RB
-#'
-#' # Posterior mean cell-type-specific allocated counts:
-#' z_hat <- fit$cdseq_result[[1]]$estGEP_count
-#'
-#' # Equal-donor reference construction:
-#' fit_equal_donor <- cdseq2(
-#'   bulk_data = bulk_counts,
-#'   reference_scRNA_count = reference_counts,
-#'   reference_scRNA_annotation = reference_cell_type,
-#'   reference_scRNA_donor = reference_donor,
-#'   reference_aggregation = "equal_donor",
-#'   reference_min_cells_per_donor_type = 10
-#' )
-#'
-#' # Fit moderate-resolution states and aggregate afterward:
-#' state_to_major <- c(
-#'   Ast_homeostatic = "Astrocytes",
-#'   Ast_reactive = "Astrocytes",
-#'   Exc_upper = "Excitatory",
-#'   Exc_deep = "Excitatory"
-#' )
-#' fit_states <- cdseq2(
-#'   bulk_data = bulk_counts,
-#'   reference_scRNA_count = reference_counts,
-#'   reference_scRNA_annotation = reference_state,
-#'   aggregate_to = state_to_major
-#' )
-#' major_phi <- fit_states$cdseq_result[[1]]$aggregated$estGEP_RB
-#' }
-#'
 #' @seealso \code{\link{cdseq}} for the original user-facing implementation.
 #'
 #' @md
 #' @md
 #' @importFrom foreach %dopar%
 #' @export
+#' @examples
+#' set.seed(1)
+#' ref <- matrix(rpois(120, 5), 20, 6,
+#'     dimnames = list(paste0("g", seq_len(20)), paste0("c", seq_len(6))))
+#' bulk <- ref[, 1:2] + ref[, 4:5]
+#' colnames(bulk) <- c("s1", "s2")
+#' fit <- cdseq2(bulk, reference_scRNA_count = ref,
+#'     reference_scRNA_annotation = rep(c("A", "B"), each = 3),
+#'     reference_aggregation = "pooled_counts", reference_precision = 100,
+#'     mcmc_iterations = 12, save_last_n_mc = 6, cpu_number = 1,
+#'     seed = 1L, verbose = FALSE)
+#' names(fit)
 cdseq2 <- function(bulk_data,
                    mcmc_iterations = 700,
                    cpu_number = 1,
@@ -1545,7 +1511,7 @@ cdseq2 <- function(bulk_data,
   }
   if (rng == 2L && !is.null(seed)) {
     warning(
-      "set.seed() is applied before each chain, but reproducibility for rng = 2 ",
+      "withr::local_seed() is applied before each chain, but reproducibility for rng = 2 ",
       "depends on how the package's Xoshiro generator is seeded internally.",
       call. = FALSE
     )
@@ -1815,7 +1781,7 @@ cdseq2 <- function(bulk_data,
       adjustment_seed <- as.integer(
         ((as.double(seed) + 17) %% (.Machine$integer.max - 1)) + 1
       )
-      set.seed(adjustment_seed)
+      withr::local_seed(adjustment_seed)
     }
 
     alpha_full <- matrix(
@@ -1965,7 +1931,7 @@ cdseq2 <- function(bulk_data,
     last_sampler_result <- NULL
 
     for (ch in seq_len(n_chains)) {
-      if (!is.null(seed)) set.seed(seed_matrix[i, ch])
+      if (!is.null(seed)) withr::local_seed(seed_matrix[i, ch])
 
       sampler_result <- gibbsSampler(
         alpha,

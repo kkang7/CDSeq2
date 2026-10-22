@@ -42,3 +42,10 @@ mismatch. Use distinct biological donor sets for reference, development and
 validation. Shared reference means alone are insufficient input: they do not
 supply known donor-to-donor expression variation.
 }
+\examples{
+data(cdseq2_toy)
+x <- cdseq2_toy
+sim <- simulate_variation_mixtures(x$data$validation$truth,
+    x$data$validation$donor_ids, unique(x$data$reference_donors), seed = 1L)
+dim(sim$bulk)
+}

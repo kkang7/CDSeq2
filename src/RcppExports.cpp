@@ -13,15 +13,15 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // gibbsSampler
-List gibbsSampler(NumericMatrix ALPHA, NumericMatrix BETA, NumericMatrix mixtureSamples, int T, int NN, int OUTPUT, int initialization, std::vector<unsigned int> CT, int verbose, int RNG, int NMC);
-RcppExport SEXP _CDSeq2_gibbsSampler(SEXP ALPHASEXP, SEXP BETASEXP, SEXP mixtureSamplesSEXP, SEXP TSEXP, SEXP NNSEXP, SEXP OUTPUTSEXP, SEXP initializationSEXP, SEXP CTSEXP, SEXP verboseSEXP, SEXP RNGSEXP, SEXP NMCSEXP) {
+List gibbsSampler(NumericMatrix ALPHA, NumericMatrix BETA, NumericMatrix mixtureSamples, int n_types, int NN, int OUTPUT, int initialization, std::vector<unsigned int> CT, int verbose, int RNG, int NMC);
+RcppExport SEXP _CDSeq2_gibbsSampler(SEXP ALPHASEXP, SEXP BETASEXP, SEXP mixtureSamplesSEXP, SEXP n_typesSEXP, SEXP NNSEXP, SEXP OUTPUTSEXP, SEXP initializationSEXP, SEXP CTSEXP, SEXP verboseSEXP, SEXP RNGSEXP, SEXP NMCSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericMatrix >::type ALPHA(ALPHASEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type BETA(BETASEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type mixtureSamples(mixtureSamplesSEXP);
-    Rcpp::traits::input_parameter< int >::type T(TSEXP);
+    Rcpp::traits::input_parameter< int >::type n_types(n_typesSEXP);
     Rcpp::traits::input_parameter< int >::type NN(NNSEXP);
     Rcpp::traits::input_parameter< int >::type OUTPUT(OUTPUTSEXP);
     Rcpp::traits::input_parameter< int >::type initialization(initializationSEXP);
@@ -29,7 +29,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type verbose(verboseSEXP);
     Rcpp::traits::input_parameter< int >::type RNG(RNGSEXP);
     Rcpp::traits::input_parameter< int >::type NMC(NMCSEXP);
-    rcpp_result_gen = Rcpp::wrap(gibbsSampler(ALPHA, BETA, mixtureSamples, T, NN, OUTPUT, initialization, CT, verbose, RNG, NMC));
+    rcpp_result_gen = Rcpp::wrap(gibbsSampler(ALPHA, BETA, mixtureSamples, n_types, NN, OUTPUT, initialization, CT, verbose, RNG, NMC));
     return rcpp_result_gen;
 END_RCPP
 }

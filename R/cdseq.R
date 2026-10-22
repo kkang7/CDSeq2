@@ -38,6 +38,17 @@
 #' @return cdseq returns estimates of both cell-type-specific gene expression profiles and cell-type proportions for each individual.
 
 
+#' @examples
+#' set.seed(1)
+#' ref <- matrix(rpois(120, 5), 20, 6,
+#'     dimnames = list(paste0("g", seq_len(20)), paste0("c", seq_len(6))))
+#' bulk <- ref[, 1:2] + ref[, 4:5]
+#' colnames(bulk) <- c("s1", "s2")
+#' fit <- cdseq(bulk, reference_scRNA_count = ref,
+#'     reference_scRNA_annotation = rep(c("A", "B"), each = 3),
+#'     reference_precision = 100, mcmc_iterations = 12, save_last_n_mc = 6,
+#'     cpu_number = 1, verbose = FALSE)
+#' names(fit)
 cdseq <- function(bulk_data,
                   mcmc_iterations = 700,
                   #tuning_iterations = 1,

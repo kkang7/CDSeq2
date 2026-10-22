@@ -17,3 +17,11 @@ Invisibly, the saved path. Existing files are never overwritten.
 \description{
 Save an explicitly trained variation scorer
 }
+\examples{
+data(cdseq2_toy)
+x <- cdseq2_toy
+f <- tempfile(fileext = ".rds")
+save_variation_scorer(x$scorer, f)
+check_variation_scorer(load_variation_scorer(f))
+unlink(f)
+}

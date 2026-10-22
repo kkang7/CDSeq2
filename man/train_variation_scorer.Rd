@@ -49,3 +49,16 @@ is Fisher-transformed normalized Pearson recovery, not association correctness.
 Grouped gene cross-validation is a development diagnostic; it does not hold
 out donors. Use \code{\link[=validate_variation_scorer]{validate_variation_scorer()}} with untouched biological donors.
 }
+\examples{
+data(cdseq2_toy)
+x <- cdseq2_toy
+benchmark <- prepare_variation_benchmark(
+    x$data$training$bulk, x$data$reference_mean,
+    x$training_fractions, x$training_counts, x$data$training$truth,
+    x$data$training$donor_ids, unique(x$data$reference_donors), "training",
+    oracle = "direct_observed_component_counts")
+model <- train_variation_scorer(benchmark,
+    context = x$scorer$context, folds = 3L, min_profiles = 50L,
+    seed = 1L, model = "GAM6")
+check_variation_scorer(model)
+}

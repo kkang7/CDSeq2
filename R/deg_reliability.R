@@ -92,6 +92,17 @@
 #'   Matrix axes are aligned by names; profiles are never silently renormalized.
 #'   Features pool the samples in the contrast, matching the frozen model.
 #' @export
+#' @examples
+#' data(cdseq2_toy)
+#' x <- cdseq2_toy
+#' de <- expand.grid(gene = rownames(x$data$reference_mean),
+#'     cell_type = colnames(x$data$reference_mean), stringsAsFactors = FALSE)
+#' de$estimated_effect <- 0.1
+#' de$p_value <- 0.5
+#' de$q_global <- 0.5
+#' features <- prepare_deg_features(de, x$data$validation$bulk,
+#'     x$data$reference_mean, x$validation_fractions)
+#' head(features)
 prepare_deg_features <- function(de, bulk, reference_mean, rna_proportions) {
   de <- .cdsdeg_de(de)
   .cdsdeg_assert(length(unique(de$contrast)) == 1L, "Prepare each contrast separately using its own sample subset, then rbind the feature tables.")
@@ -271,6 +282,12 @@ prepare_deg_features <- function(de, bulk, reference_mean, rna_proportions) {
 #'   triggers always use q<=0.10, including when bh_threshold is lower.
 #'   Vascular/unknown types have no core model. Inputs contain no ground truth.
 #' @export
+#' @examples
+#' model <- load_deg_scorer()
+#' # Bundled prediction controls demonstrate the input schema, not new validation.
+#' scores <- score_deg(model$self_test$de, features = model$self_test$features,
+#'     model = model, context = model$context)
+#' head(scores)
 score_deg <- function(de, features = NULL, bulk = NULL, reference_mean = NULL,
                       rna_proportions = NULL, model = NULL, annotations = TRUE,
                       bh_threshold = .10, score_threshold = .75,
@@ -324,17 +341,30 @@ score_deg <- function(de, features = NULL, bulk = NULL, reference_mean = NULL,
 }
 
 #' Load the frozen DEG model bundle
-#' @param path Optional RDS path. NULL finds extdata/deg_scorer_v0_23.rds in CDSeq2.
+#' @param path Optional RDS path to a complete frozen model. NULL loads the bundled
+#' model from its metadata, core and annotation files in extdata.
 #'   When sourcing files before package installation, supply this path explicitly.
 #' @param check Run bundled numerical prediction checks on the current mgcv build.
 #' @return Frozen model list for score_deg(). No training or file changes occur.
 #' @export
+#' @examples
+#' model <- load_deg_scorer()
+#' model$context
 load_deg_scorer <- function(path = NULL, check = TRUE) {
   .cdsdeg_assert(is.logical(check) && length(check) == 1L && !is.na(check), "check must be TRUE or FALSE.")
-  if (is.null(path)) path <- system.file("extdata", "deg_scorer_v0_23.rds", package = "CDSeq2")
-  .cdsdeg_assert(is.character(path) && length(path) == 1L && !is.na(path) && nzchar(path) && file.exists(path),
-    "Cannot find deg_scorer_v0_23.rds. Copy inst/extdata into CDSeq2 and reinstall, or supply path explicitly.")
-  model <- readRDS(path); .cdsdeg_model_valid(model)
+  # Assisted-by: OpenAI Codex. Split storage preserves the frozen model.
+  if (is.null(path)) {
+    root <- system.file("extdata", package = "CDSeq2", mustWork = TRUE)
+    model <- readRDS(file.path(root, "deg_scorer_metadata.rds"))
+    model$core <- readRDS(file.path(root, "deg_scorer_core.rds"))
+    model$annotations <- readRDS(file.path(root, "deg_scorer_annotations.rds"))
+  } else {
+    .cdsdeg_assert(is.character(path) && length(path) == 1L &&
+      !is.na(path) && nzchar(path) && file.exists(path),
+      "Supply a readable RDS path to a complete frozen DEG model.")
+    model <- readRDS(path)
+  }
+  .cdsdeg_model_valid(model)
   if (check) check_deg_scorer(model)
   model
 }
@@ -346,6 +376,9 @@ load_deg_scorer <- function(path = NULL, check = TRUE) {
 #' @details This checks current-runtime prediction compatibility, not biological
 #'   generalization. Controls were recorded from the frozen validation workflow.
 #' @export
+#' @examples
+#' model <- load_deg_scorer(check = FALSE)
+#' check_deg_scorer(model)
 check_deg_scorer <- function(model, tolerance = 1e-7) {
   .cdsdeg_model_valid(model)
   .cdsdeg_assert(is.numeric(tolerance) && length(tolerance) == 1L && is.finite(tolerance) && tolerance > 0, "Invalid tolerance.")

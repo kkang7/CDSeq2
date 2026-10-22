@@ -29,3 +29,12 @@ For comparisons, supply the same rows with all compared rankings finite.
 This is a ranking utility, not a validated clinical or FDR threshold.
 It does not modify association p-values or their multiple-testing family.
 }
+\examples{
+data(cdseq2_toy)
+x <- cdseq2_toy
+features <- prepare_variation_features(x$data$validation$bulk,
+    x$data$reference_mean, x$validation_fractions)
+scores <- score_variation(features, x$scorer)
+selected <- select_variation_profiles(scores, fraction = 0.2)
+table(selected$retained)
+}

@@ -222,23 +222,16 @@ Bulk-sample truth, target condition labels, and held-out donor expression are
 never used.
 }
 \examples{
-\dontrun{
-data(cdseq_example_data, package = "CDSeq2")
-
-fit4 <- cdseq4(
-  bulk_data = cdseq_example_data$bulk_data,
-  reference_scRNA_count = cdseq_example_data$reference_scRNA_count,
-  reference_scRNA_annotation =
-    cdseq_example_data$reference_scRNA_annotation,
-  reference_metadata = cdseq_example_data$reference_metadata,
-  reference_precision = 1e6,
-  mcmc_iterations = 1000,
-  save_last_n_mc = 500,
-  cpu_number = 6
-)
-
-fit4$cell_type_reference_precision
-fit4$precision_diagnostics
-}
-
+set.seed(1)
+ref <- matrix(rpois(120, 5), 20, 6,
+    dimnames = list(paste0("g", seq_len(20)), paste0("c", seq_len(6))))
+bulk <- ref[, 1:2] + ref[, 4:5]
+colnames(bulk) <- c("s1", "s2")
+fit <- cdseq4(bulk, reference_scRNA_count = ref,
+    reference_scRNA_annotation = rep(c("A", "B"), each = 3),
+    reference_scRNA_donor = rep(c("d1", "d2", "d3"), 2),
+    reference_aggregation = "pooled_counts", reference_precision = 100,
+    mcmc_iterations = 12, save_last_n_mc = 6, cpu_number = 1,
+    seed = 1L, verbose = FALSE)
+names(fit)
 }

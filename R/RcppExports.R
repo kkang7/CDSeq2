@@ -6,7 +6,7 @@
 #' @param ALPHA hyperparameter for cell type proportion.
 #' @param BETA hyperparameter for cell-type-specific GEPs.
 #' @param mixtureSamples bulk RNA-seq data in form of read counts.
-#' @param T number of cell types.
+#' @param n_types number of cell types.
 #' @param NN number of MCMC iteration.
 #' @param OUTPUT MCMC progress output control.
 #' @param initialization if 1, initialize cell type assignment with provided value, if 0, initialize cell type assignment with random values.
@@ -15,8 +15,8 @@
 #' @param RNG choose one of the random number generators, 1 for MT, 2 for Xoshiro256plus
 #' @param NMC number of MCMC samples tos save
 #' @return random integers  uniformly distributed in 0..(2^32 - 1).
-gibbsSampler <- function(ALPHA, BETA, mixtureSamples, T, NN, OUTPUT, initialization, CT, verbose, RNG, NMC) {
-    .Call('_CDSeq2_gibbsSampler', PACKAGE = 'CDSeq2', ALPHA, BETA, mixtureSamples, T, NN, OUTPUT, initialization, CT, verbose, RNG, NMC)
+gibbsSampler <- function(ALPHA, BETA, mixtureSamples, n_types, NN, OUTPUT, initialization, CT, verbose, RNG, NMC) {
+    .Call('_CDSeq2_gibbsSampler', PACKAGE = 'CDSeq2', ALPHA, BETA, mixtureSamples, n_types, NN, OUTPUT, initialization, CT, verbose, RNG, NMC)
 }
 
 splitMixSeed <- function(seed) {

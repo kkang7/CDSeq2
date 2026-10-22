@@ -9,7 +9,7 @@ gibbsSampler(
   ALPHA,
   BETA,
   mixtureSamples,
-  T,
+  n_types,
   NN,
   OUTPUT,
   initialization,
@@ -26,7 +26,7 @@ gibbsSampler(
 
 \item{mixtureSamples}{bulk RNA-seq data in form of read counts.}
 
-\item{T}{number of cell types.}
+\item{n_types}{number of cell types.}
 
 \item{NN}{number of MCMC iteration.}
 

@@ -4,16 +4,25 @@
 \name{CDSeq2-package}
 \alias{CDSeq2}
 \alias{CDSeq2-package}
-\title{CDSeq2: A package for spatial data deconvolution}
+\title{CDSeq2: Individual-level cell-type expression deconvolution}
 \description{
 \code{CDSeq2-R-package} Individual-level complete deconvolution method.
 }
-\section{Spatial-Deconvolution}{
+\section{Expression deconvolution}{
 
-CDSeq2 R package deconvolves spatial data.
+CDSeq2 estimates donor-specific cell-type expression and RNA fractions
+from bulk RNA sequencing and supports optional gene-type prioritization.
 }
 
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/kkang7/CDSeq2}
+  \item Report bugs at \url{https://github.com/kkang7/CDSeq2/issues}
+}
+
+}
 \author{
-Kai Kang \email{kangkai0714@gmail.com}
+Kai Kang \email{kangk@uncw.edu}
 }
 \keyword{internal}

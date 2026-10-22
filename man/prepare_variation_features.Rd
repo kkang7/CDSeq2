@@ -34,3 +34,10 @@ not CDSeq2 posterior allocation variability. No phenotype is required.
 GAM6 uses six features; composition_loo_r2 is returned as a diagnostic only.
 bulk_theta_r remains the correlation of bulk CPM (not logCPM) with RNA fractions.
 }
+\examples{
+data(cdseq2_toy)
+x <- cdseq2_toy
+features <- prepare_variation_features(x$data$validation$bulk,
+    x$data$reference_mean, x$validation_fractions)
+head(features)
+}

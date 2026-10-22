@@ -62,15 +62,11 @@ These steps should be performed downstream depending on the
 differential expression framework used.
 }
 \examples{
-\dontrun{
-pb_array <- create_ct_pseudobulk(
-  counts     = sc_counts,
-  cell_type  = sc_meta$cell_type,
-  patient_id = sc_meta$patient_id
-)
-
-# Extract pseudo-bulk matrix for a single cell type
-ctA_mat <- pb_array[, "A", ]
-}
-
+data(cdseq2_toy)
+x <- cdseq2_toy
+counts <- x$data$reference
+ct <- x$data$annotation
+donors <- x$data$reference_donors
+pb <- create_ct_pseudobulk(counts, ct, donors)
+dim(pb)
 }

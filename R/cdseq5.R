@@ -649,7 +649,7 @@
     as.integer(0L)
   }
 
-  set.seed(as.integer(seed + sample_index - 1L))
+  withr::local_seed(as.integer(seed + sample_index - 1L))
   sampler <- .cdseq5_resolve_gibbs_sampler(gibbs_sampler)
 
   timing <- system.time({
@@ -1015,31 +1015,6 @@
 #'   `allocation_proportions`, `effective_proportions`, `lock_diagnostics`,
 #'   and the sample-level `cdseq_result` list.
 #'
-#' @examples
-#' \dontrun{
-#' fit4 <- cdseq4(
-#'   bulk_data = bulk_data,
-#'   reference_scRNA_count = reference_count,
-#'   reference_scRNA_annotation = reference_annotation,
-#'   reference_metadata = reference_metadata,
-#'   reference_precision = 1e6,
-#'   mcmc_iterations = 1000,
-#'   save_last_n_mc = 500,
-#'   cpu_number = 6
-#' )
-#'
-#' fit5 <- cdseq5(
-#'   bulk_data = bulk_data,
-#'   stage1_fit = fit4,
-#'   reference_scRNA_annotation = reference_annotation,
-#'   proportion_component = "estProp",
-#'   lock_ratio = 100,
-#'   mcmc_iterations = 1000,
-#'   save_last_n_mc = 500,
-#'   cpu_number = 6
-#' )
-#' }
-#'
 #' @export
 cdseq5 <- function(
     bulk_data,
@@ -1177,7 +1152,7 @@ cdseq5 <- function(
     )
 
     if (isTRUE(verbose)) message("CDSeq5 Stage 1: fitting plug-in proportions and BETA.")
-    set.seed(seed)
+    withr::local_seed(seed)
     stage1_fit <- .cdseq5_call_stage1(
       stage1_function,
       stage1_args,

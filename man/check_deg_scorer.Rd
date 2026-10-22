@@ -21,3 +21,7 @@ Check frozen DEG predictions against bundled numerical controls
 This checks current-runtime prediction compatibility, not biological
 generalization. Controls were recorded from the frozen validation workflow.
 }
+\examples{
+model <- load_deg_scorer(check = FALSE)
+check_deg_scorer(model)
+}

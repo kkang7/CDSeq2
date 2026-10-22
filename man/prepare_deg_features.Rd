@@ -32,3 +32,15 @@ At least K+2 samples and a full-rank composition design are required.
 Matrix axes are aligned by names; profiles are never silently renormalized.
 Features pool the samples in the contrast, matching the frozen model.
 }
+\examples{
+data(cdseq2_toy)
+x <- cdseq2_toy
+de <- expand.grid(gene = rownames(x$data$reference_mean),
+    cell_type = colnames(x$data$reference_mean), stringsAsFactors = FALSE)
+de$estimated_effect <- 0.1
+de$p_value <- 0.5
+de$q_global <- 0.5
+features <- prepare_deg_features(de, x$data$validation$bulk,
+    x$data$reference_mean, x$validation_fractions)
+head(features)
+}

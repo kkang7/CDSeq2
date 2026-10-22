@@ -27,10 +27,9 @@ specifying the (major) cell type for each cell.}
 patient or subject identifier for each cell. This defines the
 pseudo-bulk aggregation unit.}
 
-\item{condition}{A named character or factor vector specifying the condition
-for each patient. The names must correspond to unique values of
-\code{patient_id}. In paired designs, the condition must vary within
-patients.}
+\item{condition}{A character or factor vector of length ncol(counts),
+giving the condition of each cell in column order. In paired designs,
+each patient contributes cells from both conditions.}
 
 \item{min_cells}{Integer. Minimum number of cells required for a given
 cell type within a patient for that patient to be included in DE
@@ -90,30 +89,14 @@ is not full rank or for which insufficient patient-level replication is
 available.
 }
 \examples{
-\dontrun{
-## Unpaired DE
-ct_deg_unpaired <- call_ct_DEGs_pb(
-  counts     = pb_sc_data$counts,
-  cell_type  = pb_sc_data$cell_type_major,
-  patient_id = pb_sc_data$sample_id,
-  condition  = cond_sample,
-  paired     = FALSE
-)
-
-## Paired DE (recommended for Kang IFN-beta)
-cond_sample <- with(pb_sc_data,
-  tapply(condition, donor_id, unique)
-)
-
-ct_deg_paired <- call_ct_DEGs_pb(
-  counts     = pb_sc_data$counts,
-  cell_type  = pb_sc_data$cell_type_major,
-  patient_id = pb_sc_data$donor_id,
-  condition  = cond_sample,
-  paired     = TRUE
-)
-}
-
-
-
+data(cdseq2_toy)
+x <- cdseq2_toy
+counts <- x$data$reference
+ct <- x$data$annotation
+donors <- x$data$reference_donors
+condition <- setNames(rep(c("control", "treated"), each = 3),
+    sort(unique(donors)))
+result <- call_ct_DEGs_pb(counts, ct, donors,
+    unname(condition[donors]), min_cells = 1, paired = FALSE)
+names(result)
 }

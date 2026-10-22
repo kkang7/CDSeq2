@@ -136,7 +136,7 @@ not alter the fitted model. The mapping must cover every modeled state.}
 
 \item{rng}{A scalar equal to \code{1} or \code{2}, selecting the random-number generator
 used by \code{gibbsSampler}: \code{1} for Mersenne Twister and \code{2} for
-Xoshiro256plus. \code{set.seed()} is applied before each chain when \code{seed} is not
+Xoshiro256plus. \code{withr::local_seed()} is applied before each chain when \code{seed} is not
 \code{NULL}; exact reproducibility for \code{rng = 2} also depends on how the compiled
 Xoshiro implementation is seeded.}
 
@@ -297,51 +297,17 @@ remove, mask, or reweight estimates automatically.
 }
 
 \examples{
-\dontrun{
-fit <- cdseq2(
-  bulk_data = bulk_counts,
-  reference_scRNA_count = reference_counts,
-  reference_scRNA_annotation = reference_cell_type,
-  reference_precision = 1e6,
-  mcmc_iterations = 1000,
-  save_last_n_mc = 500,
-  n_chains = 3,
-  seed = 123,
-  primary_gep_estimator = "rao_blackwell"
-)
-
-# Recommended normalized ctsGEP for the first sample:
-phi_hat <- fit$cdseq_result[[1]]$estGEP_RB
-
-# Posterior mean cell-type-specific allocated counts:
-z_hat <- fit$cdseq_result[[1]]$estGEP_count
-
-# Equal-donor reference construction:
-fit_equal_donor <- cdseq2(
-  bulk_data = bulk_counts,
-  reference_scRNA_count = reference_counts,
-  reference_scRNA_annotation = reference_cell_type,
-  reference_scRNA_donor = reference_donor,
-  reference_aggregation = "equal_donor",
-  reference_min_cells_per_donor_type = 10
-)
-
-# Fit moderate-resolution states and aggregate afterward:
-state_to_major <- c(
-  Ast_homeostatic = "Astrocytes",
-  Ast_reactive = "Astrocytes",
-  Exc_upper = "Excitatory",
-  Exc_deep = "Excitatory"
-)
-fit_states <- cdseq2(
-  bulk_data = bulk_counts,
-  reference_scRNA_count = reference_counts,
-  reference_scRNA_annotation = reference_state,
-  aggregate_to = state_to_major
-)
-major_phi <- fit_states$cdseq_result[[1]]$aggregated$estGEP_RB
-}
-
+set.seed(1)
+ref <- matrix(rpois(120, 5), 20, 6,
+    dimnames = list(paste0("g", seq_len(20)), paste0("c", seq_len(6))))
+bulk <- ref[, 1:2] + ref[, 4:5]
+colnames(bulk) <- c("s1", "s2")
+fit <- cdseq2(bulk, reference_scRNA_count = ref,
+    reference_scRNA_annotation = rep(c("A", "B"), each = 3),
+    reference_aggregation = "pooled_counts", reference_precision = 100,
+    mcmc_iterations = 12, save_last_n_mc = 6, cpu_number = 1,
+    seed = 1L, verbose = FALSE)
+names(fit)
 }
 \seealso{
 \code{\link{cdseq}} for the original user-facing implementation.

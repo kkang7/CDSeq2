@@ -64,3 +64,10 @@ Threshold changes affect reporting only, not models or annotations. Annotation
 triggers always use q<=0.10, including when bh_threshold is lower.
 Vascular/unknown types have no core model. Inputs contain no ground truth.
 }
+\examples{
+model <- load_deg_scorer()
+# Bundled prediction controls demonstrate the input schema, not new validation.
+scores <- score_deg(model$self_test$de, features = model$self_test$features,
+    model = model, context = model$context)
+head(scores)
+}

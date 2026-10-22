@@ -15,4 +15,7 @@
 #' @docType data
 #' @keywords datasets
 #' @name cdseq_example_data
+#' @examples
+#' data(cdseq_example_data)
+#' dim(cdseq_example_data$bulk_data)
 NULL

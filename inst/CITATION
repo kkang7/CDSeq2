@@ -1,5 +1,0 @@
-bibentry(bibtype = "Manual",
-  title = "CDSeq2: Individual-Level Cell-Type Expression with Gene-Type Prioritization",
-  author = c(person("Kai", "Kang"), person("Kaiyu", "Xie")),
-  year = "2026", note = "R package version 0.1.0",
-  url = "https://github.com/kkang7/CDSeq2")

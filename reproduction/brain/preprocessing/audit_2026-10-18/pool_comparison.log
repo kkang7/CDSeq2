@@ -1,6 +1,0 @@
-[1] "subject"                    "msex"                      
-[3] "age_death"                  "pmi"                       
-[5] "race"                       "Pathologic_diagnosis_of_AD"
-[7] "condition"                  "n_available_total"         
-original_pool  current_pool      same_set 
-          200           200             1 

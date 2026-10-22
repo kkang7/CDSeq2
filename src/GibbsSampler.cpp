@@ -21,7 +21,7 @@ using namespace Rcpp;
 //' @param ALPHA hyperparameter for cell type proportion.
 //' @param BETA hyperparameter for cell-type-specific GEPs.
 //' @param mixtureSamples bulk RNA-seq data in form of read counts.
-//' @param T number of cell types.
+//' @param n_types number of cell types.
 //' @param NN number of MCMC iteration.
 //' @param OUTPUT MCMC progress output control.
 //' @param initialization if 1, initialize cell type assignment with provided value, if 0, initialize cell type assignment with random values.
@@ -31,7 +31,7 @@ using namespace Rcpp;
 //' @param NMC number of MCMC samples tos save
 //' @return random integers  uniformly distributed in 0..(2^32 - 1).
 // [[Rcpp::export]]
-List gibbsSampler(NumericMatrix ALPHA, NumericMatrix BETA, NumericMatrix mixtureSamples, int T, int NN, int OUTPUT, int initialization, std::vector<unsigned int> CT, int verbose, int RNG, int NMC)
+List gibbsSampler(NumericMatrix ALPHA, NumericMatrix BETA, NumericMatrix mixtureSamples, int n_types, int NN, int OUTPUT, int initialization, std::vector<unsigned int> CT, int verbose, int RNG, int NMC)
  {
    //clock_t start,finish;
    //start=clock();
@@ -55,23 +55,23 @@ List gibbsSampler(NumericMatrix ALPHA, NumericMatrix BETA, NumericMatrix mixture
      }
    }
 
-   //vector<unsigned int>  cellTypeTot(T),csGEP_vec(genes*T), SSP_vec(T*samples);
-   vector<double> probs(T);
+   //vector<unsigned int>  cellTypeTot(n_types),csGEP_vec(genes*n_types), SSP_vec(n_types*samples);
+   vector<double> probs(n_types);
    vector<unsigned int> order(n), cellTypeBag(n);// unsigned int for saving space
 
-   vector<double> WBETA(T);
+   vector<double> WBETA(n_types);
 
-   arma::uvec  cellTypeTot(T), csGEP_vec(genes*T), SSP_vec(T*samples);
+   arma::uvec  cellTypeTot(n_types), csGEP_vec(genes*n_types), SSP_vec(n_types*samples);
    cellTypeTot.fill(0);csGEP_vec.fill(0);SSP_vec.fill(0);
 
    // this matrix stores reads-cell-type-assignment for each sample
    // use RcppArmadillo cube data structure as 3D matrix container
-   arma::cube cellTypeAssignSplit(genes,samples,T);
+   arma::cube cellTypeAssignSplit(genes,samples,n_types);
    cellTypeAssignSplit.fill(0);// initialize with zeros
    // keep all mcmc estimates
-   arma::umat csGEP_all(genes*T, NMC);
+   arma::umat csGEP_all(genes*n_types, NMC);
    csGEP_all.fill(0);
-   arma::umat SSP_all(T*samples, NMC);
+   arma::umat SSP_all(n_types*samples, NMC);
    SSP_all.fill(0);
 
    int wi,di,i,ii,j,cellType, rp, iter, wioffset, dioffset;
@@ -90,18 +90,18 @@ List gibbsSampler(NumericMatrix ALPHA, NumericMatrix BETA, NumericMatrix mixture
      //cout << i << "/" << n << endl;
      wi = gid[i];
      di = sid[i];
-     // pick a random cell type 0..T-1
+     // pick a random cell type 0..n_types-1
      if(initialization==0){
-        if(RNG==1) {cellType = (int) ( (double) randomMT() * (double) T / (double) (4294967296.0 + 1.0) );} // To prevent overflow
-        if(RNG==2) {cellType = (int) ( (double) xoshiro256rng() * (double) T) / (double) (1.8446744e+19);} // To prevent overflow
+        if(RNG==1) {cellType = (int) ( (double) randomMT() * (double) n_types / (double) (4294967296.0 + 1.0) );} // To prevent overflow
+        if(RNG==2) {cellType = (int) ( (double) xoshiro256rng() * (double) n_types) / (double) (1.8446744e+19);} // To prevent overflow
         cellTypeBag[i] = cellType; // assign this gene read to this cell type
      }else{
         // initialize cell type assignment
         cellType = (int) CT[i];
         cellTypeBag[i] = cellType;
      }
-     csGEP_vec[wi*T + cellType]++;
-     SSP_vec[di*T + cellType]++;
+     csGEP_vec[wi*n_types + cellType]++;
+     SSP_vec[di*n_types + cellType]++;
      cellTypeTot[cellType]++; // increment cellTypeTot matrix
      cellTypeAssignSplit(wi,di,cellType)++;
      order[i]=i;
@@ -120,7 +120,7 @@ List gibbsSampler(NumericMatrix ALPHA, NumericMatrix BETA, NumericMatrix mixture
 
    //WBETA = (double) (accumulate(BETA.begin(), BETA.end(), 0));
 
-   for(i=0; i<T; i++){
+   for(i=0; i<n_types; i++){
      NumericVector x = BETA( i, _ ); //copy the i th row
      // I had a bug for large precision and it turned out here is where it goes wrong
      // the std lib cpp fct accumulate is instantiated with the type of the third argument which was used 0 and it is an type of int
@@ -140,13 +140,13 @@ List gibbsSampler(NumericMatrix ALPHA, NumericMatrix BETA, NumericMatrix mixture
      }
      //if(OUTPUT==0){
        //if (iter % 10 == 0){cout<<"Running in parallel:"<< 100*iter/NN<<"% of the job is finished\r";}
-       //if (iter % 10 == 0){Rcpp::Rcout<<"Cell type number is"<<setw(4)<<T<<", data block ["<<setw(4)<<anatomical_idx<<"] finished "<<setw(4)<<100*iter/NN<<"% of MCMC iterations (worker process ID "<<setw(7)<<processID<<")\r";}
-       //if(iter == NN){Rcpp::Rcout<<"Cell type number is"<<setw(4)<<T<<", data block ["<<setw(4)<<anatomical_idx<<"] finished "<<setw(4)<<100*iter/NN<<"% of MCMC iterations (worker process ID "<<setw(7)<<processID<<")"<<std::endl;}
+       //if (iter % 10 == 0){Rcpp::Rcout<<"Cell type number is"<<setw(4)<<n_types<<", data block ["<<setw(4)<<anatomical_idx<<"] finished "<<setw(4)<<100*iter/NN<<"% of MCMC iterations (worker process ID "<<setw(7)<<processID<<")\r";}
+       //if(iter == NN){Rcpp::Rcout<<"Cell type number is"<<setw(4)<<n_types<<", data block ["<<setw(4)<<anatomical_idx<<"] finished "<<setw(4)<<100*iter/NN<<"% of MCMC iterations (worker process ID "<<setw(7)<<processID<<")"<<std::endl;}
        //if (logfile.is_open()){
         // if (iter == 0){logfile<<std::ctime(&cdseq_time);}
-        // if (iter % 10 == 0){logfile<<"Cell type number is"<<setw(4)<<T<<", data block ["<<setw(4)<<anatomical_idx<<"] finished "<<setw(4)<<100*iter/NN<<"% of MCMC iterations (worker process ID "<<setw(7)<<processID<<")\n";}
+        // if (iter % 10 == 0){logfile<<"Cell type number is"<<setw(4)<<n_types<<", data block ["<<setw(4)<<anatomical_idx<<"] finished "<<setw(4)<<100*iter/NN<<"% of MCMC iterations (worker process ID "<<setw(7)<<processID<<")\n";}
         // if (iter == NN){logfile << "\n\n";}
-         //if(iter == NN){logfile<<"Cell type number is"<<setw(4)<<T<<", data block ["<<setw(4)<<anatomical_idx<<"] finished "<<setw(4)<<100*iter/NN<<"% of MCMC iterations (worker process ID "<<setw(7)<<processID<<")\n";}
+         //if(iter == NN){logfile<<"Cell type number is"<<setw(4)<<n_types<<", data block ["<<setw(4)<<anatomical_idx<<"] finished "<<setw(4)<<100*iter/NN<<"% of MCMC iterations (worker process ID "<<setw(7)<<processID<<")\n";}
        //}
      //}
 
@@ -158,14 +158,14 @@ List gibbsSampler(NumericMatrix ALPHA, NumericMatrix BETA, NumericMatrix mixture
        cellTypeTot[cellType]--;  // substract this from counts
        cellTypeAssignSplit(wi,di,cellType)--;
 
-       wioffset = wi*T;
-       dioffset = di*T;
+       wioffset = wi*n_types;
+       dioffset = di*n_types;
 
        csGEP_vec[wioffset+cellType]--;
        SSP_vec[dioffset+cellType]--;
 
        totprob = (double) 0;
-       for (j = 0; j < T; j++) {
+       for (j = 0; j < n_types; j++) {
          probs[j] = ((double) csGEP_vec[wioffset + j] + (double) BETA(j,wi))/( (double) cellTypeTot[j]+ (double) WBETA[j])*( (double) SSP_vec[dioffset+ j] + (double) ALPHA(j,di));
          totprob += probs[j];
        }

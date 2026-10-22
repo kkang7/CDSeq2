@@ -89,6 +89,12 @@
 #' @return A data frame with one row per gene and cell type, seven predictors,
 #'   `cohort_n`, and `theta_mean` (a diagnostic, not a GAM predictor).
 #' @export
+#' @examples
+#' data(cdseq2_toy)
+#' x <- cdseq2_toy
+#' features <- prepare_variation_features(x$data$validation$bulk,
+#'     x$data$reference_mean, x$validation_fractions)
+#' head(features)
 prepare_variation_features <- function(bulk, reference_mean, rna_fractions,
                                       scorer = NULL) {
   bulk <- .vscore_matrix(bulk, 'bulk')
@@ -152,6 +158,13 @@ prepare_variation_features <- function(bulk, reference_mean, rna_fractions,
 #' @param verify Replay the saved feature/prediction sentinel after loading.
 #' @return The trained scorer object.
 #' @export
+#' @examples
+#' data(cdseq2_toy)
+#' x <- cdseq2_toy
+#' f <- tempfile(fileext = ".rds")
+#' save_variation_scorer(x$scorer, f)
+#' model <- load_variation_scorer(f)
+#' unlink(f)
 load_variation_scorer <- function(file, verify = TRUE) {
   .vscore_assert(!missing(file) && length(file) == 1L && nzchar(file) && file.exists(file),
     'Supply the path to your trained scorer RDS file.')
@@ -167,6 +180,10 @@ load_variation_scorer <- function(file, verify = TRUE) {
 #' @param tolerance Absolute numerical tolerance for replay.
 #' @return Invisibly, TRUE; otherwise stops with a diagnostic.
 #' @export
+#' @examples
+#' data(cdseq2_toy)
+#' x <- cdseq2_toy
+#' check_variation_scorer(x$scorer)
 check_variation_scorer <- function(scorer, replay = TRUE, tolerance = 1e-8) {
   .vscore_assert(requireNamespace('mgcv', quietly = TRUE), 'Install mgcv to use the variation scorer.')
   spec <- .vscore_model_spec(scorer)
@@ -210,6 +227,13 @@ check_variation_scorer <- function(scorer, replay = TRUE, tolerance = 1e-8) {
 #'   `panel_status`, and the two observable support-baseline columns. Missing
 #'   predictors and unsupported types retain missing learned scores.
 #' @export
+#' @examples
+#' data(cdseq2_toy)
+#' x <- cdseq2_toy
+#' features <- prepare_variation_features(x$data$validation$bulk,
+#'     x$data$reference_mean, x$validation_fractions)
+#' scores <- score_variation(features, x$scorer)
+#' head(scores)
 score_variation <- function(features, scorer,
                             range_action = c('flag', 'abstain')) {
   range_action <- match.arg(range_action)
@@ -318,6 +342,14 @@ score_variation <- function(features, scorer,
 #' @return Input table with `rank_within_type`, `n_eligible_in_type`, and
 #'   `retained` columns. Undefined scores are not eligible.
 #' @export
+#' @examples
+#' data(cdseq2_toy)
+#' x <- cdseq2_toy
+#' features <- prepare_variation_features(x$data$validation$bulk,
+#'     x$data$reference_mean, x$validation_fractions)
+#' scores <- score_variation(features, x$scorer)
+#' selected <- select_variation_profiles(scores, fraction = 0.2)
+#' table(selected$retained)
 select_variation_profiles <- function(scores, fraction = .2,
     ranking = c('variation_score', 'contribution_mean', 'expected_log_mean_count')) {
   ranking <- match.arg(ranking)
@@ -354,7 +386,7 @@ select_variation_profiles <- function(scores, fraction = .2,
   on.exit({do.call(RNGkind, as.list(kinds))
     if (had) assign('.Random.seed', old, .GlobalEnv)
     else if (exists('.Random.seed', .GlobalEnv, inherits = FALSE)) rm('.Random.seed', envir=.GlobalEnv)})
-  RNGkind('Mersenne-Twister','Inversion','Rejection');set.seed(seed);fun()
+  RNGkind('Mersenne-Twister','Inversion','Rejection');withr::local_seed(seed);fun()
 }
 .vscore_array <- function(x, name) {
   .vscore_assert(is.array(x) && is.numeric(x) && length(dim(x)) == 3L &&
@@ -405,6 +437,15 @@ select_variation_profiles <- function(scores, fraction = .2,
 #'   [validate_variation_scorer()]. Zero-library profiles remain unavailable;
 #'   their target correlations are not computed on a selected donor subset.
 #' @export
+#' @examples
+#' data(cdseq2_toy)
+#' x <- cdseq2_toy
+#' benchmark <- prepare_variation_benchmark(
+#'     x$data$training$bulk, x$data$reference_mean,
+#'     x$training_fractions, x$training_counts, x$data$training$truth,
+#'     x$data$training$donor_ids, unique(x$data$reference_donors), "training",
+#'     oracle = "direct_observed_component_counts")
+#' names(benchmark)
 prepare_variation_benchmark <- function(bulk, reference_mean, rna_fractions,
     estimated_counts, truth_counts, donor_ids, reference_donor_ids, cohort_id,
     oracle = 'expected_components', min_donors = 10L) {
@@ -547,6 +588,18 @@ prepare_variation_benchmark <- function(bulk, reference_mean, rna_fractions,
 #'   metrics, donor provenance and replay sentinel. It is not automatically
 #'   declared independently validated, and no held-out validation data are refitted.
 #' @export
+#' @examples
+#' data(cdseq2_toy)
+#' x <- cdseq2_toy
+#' benchmark <- prepare_variation_benchmark(
+#'     x$data$training$bulk, x$data$reference_mean,
+#'     x$training_fractions, x$training_counts, x$data$training$truth,
+#'     x$data$training$donor_ids, unique(x$data$reference_donors), "training",
+#'     oracle = "direct_observed_component_counts")
+#' model <- train_variation_scorer(benchmark,
+#'     context = x$scorer$context, folds = 3L, min_profiles = 50L,
+#'     seed = 1L, model = "GAM6")
+#' check_variation_scorer(model)
 train_variation_scorer <- function(benchmarks, context, gene_groups=NULL, folds=5L,
     seed=1L,min_profiles=100L,retentions=seq(0,1,.05), model=c('GAM6','GAM7')) {
   spec <- .vscore_spec(match.arg(model)); .vscore_features <- spec$features
@@ -619,6 +672,16 @@ train_variation_scorer <- function(benchmarks, context, gene_groups=NULL, folds=
 #'   separation checks. This evaluates profile recovery, not downstream
 #'   association power, FDR or cell-type attribution.
 #' @export
+#' @examples
+#' data(cdseq2_toy)
+#' x <- cdseq2_toy
+#' benchmark <- prepare_variation_benchmark(
+#'     x$data$validation$bulk, x$data$reference_mean,
+#'     x$validation_fractions, x$validation_counts, x$data$validation$truth,
+#'     x$data$validation$donor_ids, unique(x$data$reference_donors), "validation",
+#'     oracle = "direct_observed_component_counts")
+#' evaluation <- validate_variation_scorer(x$scorer, benchmark)
+#' evaluation$donor_checks
 validate_variation_scorer <- function(scorer,benchmarks,retentions=seq(0,1,.05)) {
   check_variation_scorer(scorer)
   .vscore_assert(length(scorer$donor_ids)>0L&&length(scorer$reference_donor_ids)>0L,
@@ -649,6 +712,13 @@ validate_variation_scorer <- function(scorer,benchmarks,retentions=seq(0,1,.05))
 #' @param file Destination RDS path.
 #' @return Invisibly, the saved path. Existing files are never overwritten.
 #' @export
+#' @examples
+#' data(cdseq2_toy)
+#' x <- cdseq2_toy
+#' f <- tempfile(fileext = ".rds")
+#' save_variation_scorer(x$scorer, f)
+#' check_variation_scorer(load_variation_scorer(f))
+#' unlink(f)
 save_variation_scorer <- function(scorer,file) {
   check_variation_scorer(scorer)
   .vscore_assert(length(file)==1L&&!is.na(file)&&nzchar(file)&&!file.exists(file),'Choose a new model file path.')
@@ -681,6 +751,12 @@ save_variation_scorer <- function(scorer,file) {
 #'   `realized_counts`, donor provenance and simulation settings. Run CDSeq2 on
 #'   the simulated bulk separately, then call [prepare_variation_benchmark()].
 #' @export
+#' @examples
+#' data(cdseq2_toy)
+#' x <- cdseq2_toy
+#' sim <- simulate_variation_mixtures(x$data$validation$truth,
+#'     x$data$validation$donor_ids, unique(x$data$reference_donors), seed = 1L)
+#' dim(sim$bulk)
 simulate_variation_mixtures <- function(component_counts, donor_ids,
     reference_donor_ids, library_sizes=NULL, rna_fractions=NULL, seed=1L) {
   a<-.vscore_array(component_counts,'component_counts')

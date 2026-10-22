@@ -22,4 +22,8 @@ data(cdseq_example_data)
 A list containing example data used for demonstrating cdseq functions.
 The object includes matrices and vectors that represent a simulated bulk RNA-seq experiment.
 }
+\examples{
+data(cdseq_example_data)
+dim(cdseq_example_data$bulk_data)
+}
 \keyword{datasets}

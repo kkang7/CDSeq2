@@ -88,19 +88,15 @@ This function is typically used after pseudo-bulk DE analysis
 or benchmarking evaluation.
 }
 \examples{
-\dontrun{
-bench_genes <- filter_genes_benchmark(
-  ct_deg_list       = ct_deg,
-  target_cell_types = c("B", "CD4T", "CD8T"),
-  n_deg_per_ct      = 25,
-  n_shared_deg      = 0,
-  n_non_deg         = 100,
-  deg_pval_cutoff   = 0.01,
-  deg_logfc_cutoff  = 0.5,
-  seed              = 1
-)
-}
-
+genes <- paste0("g", seq_len(20))
+a <- data.frame(gene = genes, log2FoldChange = c(rep(1, 5), rep(0, 15)),
+    adj.P.Val = c(rep(0.001, 5), rep(0.9, 15)))
+b <- a
+b$log2FoldChange <- rev(a$log2FoldChange)
+b$adj.P.Val <- rev(a$adj.P.Val)
+selected <- filter_genes_benchmark(list(A = a, B = b), c("A", "B"),
+    n_deg_per_ct = 2, n_non_deg = 3, seed = 1)
+selected$genes
 }
 \seealso{
 \code{\link{call_ct_DEGs_pb}}

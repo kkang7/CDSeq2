@@ -66,3 +66,17 @@ single-cell data, filtering genes and cell types based on PB support,
 optionally enforcing minimum cell counts per cell type within samples,
 and generating pseudobulk representations.
 }
+\examples{
+data(cdseq2_toy)
+x <- cdseq2_toy
+counts <- x$data$reference
+ct <- x$data$annotation
+donors <- x$data$reference_donors
+meta <- data.frame(cell_id = colnames(counts), celltype = ct,
+    sampleID = donors)
+# A shared input here illustrates formatting only, not independent validation.
+b <- generate_benchmark_dataset(counts, meta, counts, meta,
+    min_cells_per_ct = 1, min_samples_per_ct = 1,
+    min_cells_per_gene = 1, min_gene_total = 1, verbose = FALSE)
+names(b)
+}

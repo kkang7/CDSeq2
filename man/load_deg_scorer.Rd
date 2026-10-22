@@ -7,7 +7,8 @@
 load_deg_scorer(path = NULL, check = TRUE)
 }
 \arguments{
-\item{path}{Optional RDS path. NULL finds extdata/deg_scorer_v0_23.rds in CDSeq2.
+\item{path}{Optional RDS path to a complete frozen model. NULL loads the bundled
+model from its metadata, core and annotation files in extdata.
 When sourcing files before package installation, supply this path explicitly.}
 
 \item{check}{Run bundled numerical prediction checks on the current mgcv build.}
@@ -17,4 +18,8 @@ Frozen model list for score_deg(). No training or file changes occur.
 }
 \description{
 Load the frozen DEG model bundle
+}
+\examples{
+model <- load_deg_scorer()
+model$context
 }

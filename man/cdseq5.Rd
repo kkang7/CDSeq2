@@ -147,29 +147,3 @@ term is therefore approximately 99.01\% anchored to \code{theta_star} when
 inference because the finite-ALPHA Gibbs kernel still contains assignment
 counts.
 }
-\examples{
-\dontrun{
-fit4 <- cdseq4(
-  bulk_data = bulk_data,
-  reference_scRNA_count = reference_count,
-  reference_scRNA_annotation = reference_annotation,
-  reference_metadata = reference_metadata,
-  reference_precision = 1e6,
-  mcmc_iterations = 1000,
-  save_last_n_mc = 500,
-  cpu_number = 6
-)
-
-fit5 <- cdseq5(
-  bulk_data = bulk_data,
-  stage1_fit = fit4,
-  reference_scRNA_annotation = reference_annotation,
-  proportion_component = "estProp",
-  lock_ratio = 100,
-  mcmc_iterations = 1000,
-  save_last_n_mc = 500,
-  cpu_number = 6
-)
-}
-
-}

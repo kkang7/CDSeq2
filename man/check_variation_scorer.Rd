@@ -19,3 +19,8 @@ Invisibly, TRUE; otherwise stops with a diagnostic.
 \description{
 Check the frozen variation scorer and saved prediction replay
 }
+\examples{
+data(cdseq2_toy)
+x <- cdseq2_toy
+check_variation_scorer(x$scorer)
+}

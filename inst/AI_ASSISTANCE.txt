@@ -1,0 +1,7 @@
+OpenAI Codex assisted with analysis software, tests, documentation and
+Bioconductor preparation. Historical exact model/version records are unavailable.
+The maintainers remain responsible for review, verification and maintenance.
+Bioconductor preparation adds executable examples, isolates seeded RNG changes,
+and splits frozen DEG model storage without refitting. Tests verify prediction
+replay and deterministic inference. This notice does not assert human approval
+of changes made after the manuscript submission.

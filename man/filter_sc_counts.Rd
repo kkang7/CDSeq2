@@ -25,19 +25,19 @@ giving the cell-type annotation for each cell.}
 \item{sample_id}{A character or factor vector of length \code{ncol(counts)}
 indicating the sample / patient / individual ID for each cell.}
 
-\item{min_cells_per_ct}{Integer ≥ 1.
+\item{min_cells_per_ct}{Integer at least 1.
 Minimum number of cells required for a cell type to be considered present
 within a sample.}
 
-\item{min_samples_per_ct}{Integer ≥ 1.
+\item{min_samples_per_ct}{Integer at least 1.
 Minimum number of samples in which a cell type must meet
 \code{min_cells_per_ct} to be retained globally.}
 
-\item{min_gene_total}{Integer ≥ 0.
+\item{min_gene_total}{Integer at least 0.
 Minimum total read count across all retained cells required for a gene
 to be kept.}
 
-\item{min_cells_per_gene}{Integer ≥ 1.
+\item{min_cells_per_gene}{Integer at least 1.
 Minimum number of cells in which a gene must be expressed (nonzero)
 to be retained.}
 
@@ -120,21 +120,15 @@ The filtered output can be safely used for:
 }
 }
 \examples{
-\dontrun{
-res <- filter_sc_counts(
-  counts = sc_counts,
-  cell_type = sc_celltype,
-  sample_id = sc_patient,
-  min_cells_per_ct = 5,
-  min_samples_per_ct = 3,
-  min_gene_total = 20,
-  min_cells_per_gene = 3
-)
-
-counts_filt <- res$counts
-}
-
-
+data(cdseq2_toy)
+x <- cdseq2_toy
+counts <- x$data$reference
+ct <- x$data$annotation
+donors <- x$data$reference_donors
+filtered <- filter_sc_counts(counts, ct, donors,
+    min_cells_per_ct = 1, min_samples_per_ct = 1,
+    min_gene_total = 1, min_cells_per_gene = 1)
+dim(filtered$counts)
 }
 \author{
 Kai Kang

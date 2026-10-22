@@ -7,6 +7,14 @@
 #'   unsupported and out-of-range counts and retained fractions. Model identity
 #'   and context, if recorded, are attached as attributes.
 #' @export
+#' @examples
+#' data(cdseq2_toy)
+#' x <- cdseq2_toy
+#' features <- prepare_variation_features(x$data$validation$bulk,
+#'     x$data$reference_mean, x$validation_fractions)
+#' scores <- score_variation(features, x$scorer)
+#' selected <- select_variation_profiles(scores, fraction = 0.2)
+#' summarize_variation_selection(selected)
 summarize_variation_selection <- function(selected) {
   required <- c('gene','cell_type','variation_score','retained')
   if (!is.data.frame(selected) || !all(required %in% names(selected)) ||

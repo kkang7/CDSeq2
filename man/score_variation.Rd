@@ -31,3 +31,11 @@ The index is not a probability of a correct association, a p-value, or an
 estimate of effect-size accuracy. It does not establish cell-type attribution.
 Rank within cell type; inspect composition, support, and range flags.
 }
+\examples{
+data(cdseq2_toy)
+x <- cdseq2_toy
+features <- prepare_variation_features(x$data$validation$bulk,
+    x$data$reference_mean, x$validation_fractions)
+scores <- score_variation(features, x$scorer)
+head(scores)
+}

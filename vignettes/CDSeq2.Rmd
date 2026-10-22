@@ -1,0 +1,169 @@
+---
+title: "Individual-level expression and gene-type prioritization with CDSeq2"
+author: "Kai Kang"
+output: BiocStyle::html_document
+vignette: >
+  %\VignetteIndexEntry{Individual-level expression and gene-type prioritization with CDSeq2}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(CDSeq2)
+```
+
+# Overview
+
+CDSeq2 estimates RNA fractions and individual-level cell-type expression
+from bulk RNA counts and an annotated single-cell reference. Its optional
+six-feature generalized additive model prioritizes gene-cell-type profiles
+whose cross-donor expression is expected to be recovered more accurately.
+Prioritization changes the retained set, not the underlying expression estimates.
+It is not an association test or a guarantee of false discovery rate control.
+
+This fully synthetic example uses independent training and validation donors.
+The short chains demonstrate the interface; scientific analyses require
+convergence diagnostics and appropriate chain lengths. The synthetic scorer
+is a teaching example and should not be used for biological samples.
+
+# Simulate reference and bulk counts
+
+Rows represent genes. Bulk columns represent donors; reference columns
+represent cells. Component counts have gene, cell type and donor dimensions.
+
+```{r simulation}
+# Entirely synthetic teaching data; no participant data are used.
+simulate_tutorial <- function() {
+  set.seed(20261015)
+  genes <- sprintf('Gene_%03d', seq_len(240))
+  types <- c('Excitatory neurons', 'Inhibitory neurons', 'Astrocytes')
+  mu <- matrix(rgamma(720, shape=1.5), 240, 3, dimnames=list(genes, types))
+  for(k in 1:3) mu[((k-1)*60+1):(k*60),k] <- mu[((k-1)*60+1):(k*60),k]*8
+  mu <- sweep(mu,2,colSums(mu),'/')
+  annotation <- rep(types,each=12)
+  reference <- vapply(seq_along(annotation),function(j)
+    as.numeric(rmultinom(1,4000,mu[,annotation[j]])),numeric(240))
+  dimnames(reference) <- list(genes,sprintf('Reference_cell_%02d',1:36))
+  reference_donors <- rep(sprintf('Reference_donor_%02d',1:6),6)
+  reference_mean <- vapply(types,function(ct)rowSums(reference[,annotation==ct,drop=FALSE]),numeric(240))
+  reference_mean <- sweep(reference_mean,2,colSums(reference_mean),'/')
+  dimnames(reference_mean) <- list(genes,types)
+  make_cohort <- function(label,n=20) {
+    samples <- sprintf('%s_%02d',label,seq_len(n))
+    phenotype <- as.numeric(scale(rnorm(n)))
+    genotype <- rbinom(n,2,.35)
+    counts <- array(0,c(240,3,n),list(genes,types,samples))
+    theta <- matrix(rgamma(n*3,shape=4),n,3,dimnames=list(samples,types))
+    theta <- theta/rowSums(theta)
+    for(i in seq_len(n)) for(k in 1:3) {
+      z <- log(mu[,k])+rnorm(240,0,runif(240,.1,.65))
+      if(k==1) {z[1:8] <- z[1:8]+.4*phenotype[i];z[9:16] <- z[9:16]+.45*(genotype[i]-.7)}
+      counts[,k,i] <- as.numeric(rmultinom(1,round(30000*theta[i,k]),exp(z)))
+    }
+    list(bulk=apply(counts,c(1,3),sum),truth=counts,
+      donor_ids=setNames(samples,samples),
+      phenotype=setNames(phenotype,samples),genotype=setNames(genotype,samples))
+  }
+  list(reference=reference,annotation=annotation,reference_donors=reference_donors,
+    reference_mean=reference_mean,training=make_cohort('Training'),validation=make_cohort('Validation'))
+}
+data <- simulate_tutorial()
+```
+
+# Infer expression and RNA fractions
+
+```{r inference}
+fit_tutorial <- function(cohort,data,seed) {
+  fit <- CDSeq2::cdseq2(bulk_data=cohort$bulk,
+    reference_scRNA_count=data$reference,
+    reference_scRNA_annotation=data$annotation,
+    reference_scRNA_donor=data$reference_donors,
+    reference_aggregation='pooled_counts',reference_precision=10000,
+    mcmc_iterations=100,save_last_n_mc=40,cpu_number=1,n_chains=1L,
+    seed=seed,return_mcmc_arrays=FALSE,return_assignments=FALSE,verbose=FALSE)
+  genes <- rownames(cohort$bulk);samples <- colnames(cohort$bulk)
+  types <- colnames(data$reference_mean)
+  # Paper-compatible posterior mean allocated reads, not estGEP_RB parameters.
+  counts <- array(0,c(length(genes),length(types),length(samples)),list(genes,types,samples))
+  fractions <- matrix(0,length(samples),length(types),dimnames=list(samples,types))
+  for(i in seq_along(samples)) {
+    counts[,,i] <- fit$cdseq_result[[i]]$estGEP_count
+    fractions[i,] <- as.numeric(fit$cdseq_result[[i]]$estProp)
+  }
+  stopifnot(max(abs(apply(counts,c(1,3),sum)-cohort$bulk))<1e-6,
+    max(abs(rowSums(fractions)-1))<1e-8)
+  list(counts=counts,fractions=fractions,fit=fit)
+}
+training <- fit_tutorial(data$training, data, 101)
+validation <- fit_tutorial(data$validation, data, 202)
+head(validation$fractions)
+```
+
+# Train, validate and prioritize
+
+Training requires known component expression. Applying a trained scorer requires
+bulk counts, reference means and estimated fractions, but no truth. Donors used
+for training must be distinct from validation and reference donors. Tissue,
+cell-type coverage and inference settings should match the training context.
+
+```{r prioritization}
+make_tutorial_benchmark <- function(cohort,inferred,data,label) {
+  CDSeq2::prepare_variation_benchmark(bulk=cohort$bulk,
+    reference_mean=data$reference_mean,rna_fractions=inferred$fractions,
+    estimated_counts=inferred$counts,truth_counts=cohort$truth,
+    donor_ids=cohort$donor_ids,reference_donor_ids=unique(data$reference_donors),
+    cohort_id=label,oracle='direct_observed_component_counts')
+}
+prioritize_tutorial <- function(data,training,validation) {
+  train <- make_tutorial_benchmark(data$training,training,data,'synthetic_training')
+  test <- make_tutorial_benchmark(data$validation,validation,data,'synthetic_validation')
+  scorer <- CDSeq2::train_variation_scorer(train,context=list(
+    application='Synthetic documentation tutorial',tissue='Synthetic brain-like mixture',
+    deconvolution_method='CDSeq2',fit_settings=list(mcmc_iterations=100,
+      save_last_n_mc=40,reference_precision=10000,estimator='estGEP_count + estProp')),
+    folds=3L,min_profiles=50L,seed=20261015,model='GAM6')
+  evaluation <- CDSeq2::validate_variation_scorer(scorer,test)
+  features <- CDSeq2::prepare_variation_features(data$validation$bulk,
+    data$reference_mean,validation$fractions,scorer=scorer)
+  scores <- CDSeq2::score_variation(features,scorer,range_action='flag')
+  selected <- CDSeq2::select_variation_profiles(scores,fraction=.2)
+  stopifnot(all(table(selected$cell_type[selected$retained])==48),
+    !any(data$training$donor_ids %in% data$validation$donor_ids),
+    all(evaluation$donor_checks$training_target_overlap==0))
+  list(scorer=scorer,evaluation=evaluation,selected=selected)
+}
+priority <- prioritize_tutorial(data, training, validation)
+summary <- summarize_variation_selection(priority$selected)
+summary
+```
+
+The selection fraction is applied within each supported cell type. Undefined
+features and unsupported cell types are not silently assigned scores. Report
+both recovery and coverage: retaining fewer profiles can improve precision
+while reducing recall. Select retention thresholds independently of evaluation
+truth. A scorer trained on one tissue or inference setting may not transfer.
+
+# Save the trained model
+
+```{r persistence}
+model_file <- tempfile(fileext = ".rds")
+save_variation_scorer(priority$scorer, model_file)
+reloaded <- load_variation_scorer(model_file)
+check_variation_scorer(reloaded)
+unlink(model_file)
+```
+
+# Further resources
+
+The [CDSeq2 book](https://kkang7.github.io/CDSeq2/) describes phenotype and eQTL
+applications and reconstruction of the ROSMAP benchmarks. Full reproduction
+materials and the frozen brain scorer are archived at
+<https://doi.org/10.5281/zenodo.23489824>. Large benchmark downloads are not
+needed to run this vignette.
+
+# Session information
+
+```{r session}
+sessionInfo()
+```

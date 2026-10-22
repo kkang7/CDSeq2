@@ -1,53 +1,41 @@
-# CDSeq2
+# CDSeq2: Bioconductor submission candidate
 
-Archived software: [CDSeq2 0.1.0 (10.5281/zenodo.23489824)](https://doi.org/10.5281/zenodo.23489824).
+This branch prepares version 0.99.0 for Bioconductor review. It is not yet
+accepted by or installable from Bioconductor. It requires R 4.6 or later.
 
-Reference-based individual-level cell-type expression inference with optional gene-type prioritization.
-
-This repository contains the R package, a Quarto book and reproduction workflows for the accompanying manuscript. The book covers installation, a complete synthetic tutorial, analysis of new data, scorer training and validation, phenotype/eQTL applications, all manuscript figures and underlying tables.
-
-## Installation
-
-Run the following in R:
-
-```r
-install.packages("remotes")
-if (!requireNamespace("BiocManager", quietly = TRUE)) {
-  install.packages("BiocManager")
-}
-if (!requireNamespace("limma", quietly = TRUE)) {
-  BiocManager::install("limma", ask = FALSE, update = FALSE)
-}
-remotes::install_github("kkang7/CDSeq2")
-```
-
-R >= 4.1 and a working package compilation toolchain are required. The commands above install the Bioconductor dependency `limma` before installing CDSeq2.
+CDSeq2 infers individual-level cell-type expression and RNA fractions from
+bulk RNA sequencing with a single-cell reference. Optional gene-type
+prioritization helps focus follow-up on supported profiles. Scorer training
+requires known component expression and independent validation; applying a
+trained scorer does not require truth. Scores are not association p-values.
 
 ## Documentation
 
-Read the [CDSeq2 Quarto book](https://kkang7.github.io/CDSeq2/) for tutorials, analysis workflows and manuscript reproduction instructions.
+Run `vignette("CDSeq2", package = "CDSeq2")` after installing with vignettes.
+The executable vignette generates synthetic reference, training and validation
+data and demonstrates inference, scoring and selection diagnostics.
 
-## Reproduce manuscript version 16
+Full documentation: https://kkang7.github.io/CDSeq2/
+Frozen paper release: https://doi.org/10.5281/zenodo.23489824
+Paper reproduction workflows remain on the GitHub main branch and in the archive.
+The archived version 0.1.0 is unchanged.
 
-```bash
-python3 reproduction/reproduce.py tables
-python3 reproduction/reproduce.py independent-prepare
-python3 reproduction/reproduce.py brain-prepare
-```
+## Local installation
 
-See `book/chapters/reproduce.qmd` for commands to rebuild all 25 figures and run the native independent eQTL benchmark. Statistical figures use the 42 included CSV tables. Figure 1 also requires Python with reportlab and pypdfium2. Verified reconstructed inputs and the source-verification workflow are included in the book downloads. Native reruns and the additional prioritization/null diagnostics are separate commands documented in the book.
+From the parent directory, run `R CMD INSTALL CDSeq2_0.99.0.tar.gz` after installing
+the dependencies listed in DESCRIPTION. The Bioconductor development check
+workflow covers Linux, macOS and Windows when this branch is pushed.
 
-The comparison is standard BayesPrism versus CDSeq2 without and with gene-type prioritization. Prioritization selects profiles from the same CDSeq2 fit; it does not change expression or association p values. Report accuracy and coverage together.
+## Changes for review
 
-## Repository layout
+See NEWS. Public function names are preserved. Explicitly seeded operations
+now restore the caller RNG state. Frozen DEG model storage is split into smaller
+files without refitting; the loader still accepts the original complete RDS.
+Benchmark gene filtering accepts limma and DESeq2-style columns and correctly
+labels shared effects only in the affected types.
 
-| Directory | Contents |
-|---|---|
-| `R`, `src`, `man`, `data`, `inst` | R package implementation and help |
-| `book` | Quarto sources, figures, table and benchmark downloads |
-| `examples` | Four-part runnable synthetic vignette |
-| `reproduction` | Paper and brain-study reproduction entry points |
-| `tools` | Dependency setup, GitHub configuration and book checks |
-| `.github/workflows` | GitHub Pages build and deployment |
+## Attribution
 
-`work/`, native fit caches, rendered website output and tutorial output are ignored by Git. Package installation excludes the book and reproduction assets. Original package authorship and the MIT license are preserved. See `RELEASE_NOTES.md` and `VALIDATION.txt` for the delivery scope.
+Kai Kang developed CDSeq2; Kaiyu Xie contributed benchmarking. Supported by the
+AMS-Simons Research Enhancement Grant for PUI Faculty and the UNCW CSE Research
+Initiative fund. See inst/AI_ASSISTANCE.txt for AI assistance disclosure.

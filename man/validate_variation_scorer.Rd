@@ -25,3 +25,14 @@ is allowed; validation target donors cannot contribute to either reference.
 No model fitting or threshold optimization is performed. Once examined,
 validation data must not be reused as untouched evidence after model tuning.
 }
+\examples{
+data(cdseq2_toy)
+x <- cdseq2_toy
+benchmark <- prepare_variation_benchmark(
+    x$data$validation$bulk, x$data$reference_mean,
+    x$validation_fractions, x$validation_counts, x$data$validation$truth,
+    x$data$validation$donor_ids, unique(x$data$reference_donors), "validation",
+    oracle = "direct_observed_component_counts")
+evaluation <- validate_variation_scorer(x$scorer, benchmark)
+evaluation$donor_checks
+}
