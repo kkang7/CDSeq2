@@ -4,7 +4,7 @@ Version: 0.99.0
 Authors@R: 
      c(person(given="Kai",
      family="Kang",
-     email = "kangk@uncw.edu",
+     email = "kangkai0714@gmail.com",
      role = c("aut", "cre"),
      comment = c( ORCID = "0000-0002-4348-3941")),
      person("Kaiyu", "Xie", email = "kx1715@uncw.edu", role = "ctb"),
